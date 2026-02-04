@@ -19,7 +19,6 @@ write(result, "out.tk")
 String binFile = translate("out.tk")
 write (binfile, "out.tko")
 
-# Hashy browny mappers??
 */
 
 #include <stdlib.h>
@@ -54,7 +53,7 @@ char* expandLD(char* rd, char* value, char instructionLabel[][256], unsigned int
             perror("invalid label address!");
             return NULL;
         }
-    } else if (deciVerify(value, 0)) {
+    } else if (deciVerify(value, 0)) { // // check this todo
         val = strtoull(value, NULL, 0);
     } else {
         perror("Invalid address for ld!!");
@@ -150,6 +149,7 @@ int deciVerify(char* c, int flag) {
 }
 
 char* getMacroLine(char* line, char** values, int count, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
+    char* result = malloc(512);
     // rd, rd, rd
     if (((strncmp(line, "\tadd", 4) == 0)
         || (strncmp(line, "\tsub", 4) == 0)
@@ -173,8 +173,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
                 }
             }
 
-            strcat(line, "\n");
-            return line;
+            sprintf(result, "%s\n", line);
+            return result;
     }
 
     // rd, rd
@@ -186,8 +186,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
                     return NULL;
                 }
             }
-            strcat(line, "\n");
-            return line;
+            sprintf(result, "%s\n", line);
+            return result;
     }
     
     // rd, L
@@ -204,8 +204,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
                 perror("invalid register or decimal value in instruction line!");
                 return NULL;
             }
-            strcat(line, "\n");
-            return line;
+            sprintf(result, "%s\n", line);
+            return result;
     }
 
     // rd
@@ -216,8 +216,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
             perror("invalid register in instruction line!");
             return NULL;
         }
-        strcat(line, "\n");
-        return line;
+        sprintf(result, "%s\n", line);
+        return result;
     }
 
     // L
@@ -226,8 +226,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
             perror("invalid decimal value in instruction line!");
             return NULL;
         }
-        strcat(line, "\n");
-        return line;
+        sprintf(result, "%s\n", line);
+        return result;
     }
 
     if (strcmp(line, "\treturn") == 0 && count == 0) return line;
@@ -237,26 +237,27 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         if (!verifyRegister(values[0]) || !verifyRegister(values[1]) || !verifyRegister(values[2]) || !deciVerify(values[3], 0)) {
             return NULL;
         }
-        strcat(line, "\n");
-        return line;
+        sprintf(result, "%s\n", line);
+        return result;
     }
 
     // seperate macro case
     if (strncmp(line, "\tmov", 4) == 0 && count == 3) {
         if (strncmp(line, "\tmov (", 6) == 0 && count == 3) {
             if (verifyRegister(values[0]) && deciVerify(values[1], 1) && verifyRegister(values[2])) {
-                strcat(line, "\n");
-                return line;
+                sprintf(result, "%s\n", line);
+                return result;
             }
         } else {
             if (verifyRegister(values[0]) && verifyRegister(values[1]) && deciVerify(values[2], 1)) {
-                strcat(line, "\n");
-                return line;
+                sprintf(result, "%s\n", line);
+                return result;
             }
         }
     } else if (strncmp(line, "\tmov", 4) == 0 && count == 2) {
         if (verifyRegister(values[0]) && (verifyRegister(values[1]) || deciVerify(values[1], 0))) {
-            return line;
+            sprintf(result, "%s\n", line);
+            return result;
         } else {
             perror("Mov arguments invalid");
             return NULL;
@@ -297,10 +298,14 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
 
     // TODO
     if (strncmp(line, "\tpush", 5) == 0) {
-        return expandPush(values[0]);
+        if (verifyRegister(values[0])) {
+            return expandPush(values[0]);
+        }
     }
     if (strncmp(line, "\tpop", 4) == 0) {
-        return expandPush(values[0]);
+        if (verifyRegister(values[0])) {
+            return expandPop(values[0]);
+        }
     }
 
     perror("non-existent instruction!");
@@ -346,8 +351,7 @@ int findAddress(char* file, char instructionLabel[][256], unsigned int* instruct
 }
 
 char* expandMacros(char* file, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
-    char* fileCopy = strdup(file);  
-
+    char* fileCopy = strdup(file);
     char* result = malloc(strlen(file) * 1024);
     result[0] = '\0';
 
@@ -355,11 +359,20 @@ char* expandMacros(char* file, char instructionLabel[][256], unsigned int* instr
     char* token = strtok_r(fileCopy, "\n", &lineptr);
     char* values[4];
 
+    char* mode = ".code";
+
     while (token != NULL) {
-        
-        if (strlen(token) > 0 && token[0] == '\t') {
+        if (strcmp(token, mode) != 0 || strlen(result) == 0) {
+            if (strcmp(token, ".code") == 0) {
+                mode = ".code";
+            } else if (strcmp(token, ".data") == 0) {
+                mode = ".data";
+            }
+        }
+        if (strlen(token) > 0 && token[0] == '\t' && strcmp(mode, ".code") == 0) {
             char *macroptr;
-            char* part = strtok_r(strdup(token), "\t, ()", &macroptr);
+            char* dup = strdup(token);
+            char* part = strtok_r(dup, "\t, ()", &macroptr);
             int count = 0;
             
             while (part != NULL) {
@@ -378,18 +391,17 @@ char* expandMacros(char* file, char instructionLabel[][256], unsigned int* instr
                 free(result);
                 return NULL;
             }
-            
             for (int i = 0; i < count; i++) {
                 free(values[i]);
             }            
             strcat(result, res);
-            // free(res);
         } else {
             if (token[0] != ':') {
                 strcat(result, token);
                 strcat(result, "\n");
             }
         }
+
         token = strtok_r(NULL, "\n", &lineptr);
     }
 
@@ -495,11 +507,11 @@ int main(int argc, char* argv[]) {
 
     char* cleanedFile = cleanFile(argv[1]);
 
-    printf("%s",cleanedFile);
     char instructionLabel[1024][256];
     unsigned int instructionAddress[1024];
     int labelCount = findAddress(cleanedFile, instructionLabel, instructionAddress);
-
+    
+    printf("%s",cleanedFile);
     char* result = expandMacros(cleanedFile, instructionLabel, instructionAddress, labelCount);
 
     printf("%s", result);
