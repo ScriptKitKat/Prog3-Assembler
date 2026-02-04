@@ -26,56 +26,90 @@ write (binfile, "out.tko")
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <stdint.h>
 
+
+uint64_t getAddress(char* val, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
+    for (int i = 0; i < labelCount; i++) {
+        if (strcmp(instructionLabel[i], val) == 0) {
+            return instructionAddress[i];
+        }
+    }
+    return 0;
+}
 
 // count for data too, increase by 8
-char* expandMacros(char* file, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
-    char* fileCopy = strdup(file);  
+char* expandLD(char* rd, char* value, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
+    uint64_t val;
 
-    char* result = malloc(1024 * 1024);
-    result[0] = '\0';
-
-    char *lineptr;
-    char* token = strtok_r(fileCopy, "\n", &lineptr);
-    char* values[4];
-
-    while (token != NULL) {
-        if (strlen(token) > 0 && token[0] == '\t') {
-            
-            strcat(result, res);
-            free(res);
-            char *macroptr;
-            char* part = strtok_r(token, "\t, ()", &macroptr);
-            int count = 0;
-            
-            while (part != NULL) {
-                if (count != 0) {
-                    values[count - 1] = part;
-                }
-                count++;
-                part = strtok_r(token, "\t, ()", &macroptr);
-            }
-            count--;
-
-            char* res = getMacroLine(line, values, count, instructionLabel, instructionAddress, labelCount);
-
-            if (res == NULL) {
-                free(fileCopy);
-                free(result);
-                return NULL;
-            }
-        } else {
-            strcat(result, token);
-            strcat(result, "\n");
-        }
-        token = strtok_r(line, "\n", &lineptr);
+    if (value == NULL) {
+        perror("invalid value!\n");
+        return NULL;
     }
 
-    free(fileCopy);
+    if (value[0] == ':') {
+        val = getAddress(value, instructionLabel, instructionAddress, labelCount);
+
+        if (val == 0) {
+            perror("invalid label address!");
+            return NULL;
+        }
+    } else if (deciVerify(value, 0)) {
+        val = strtoull(value, NULL, 0);
+    } else {
+        perror("Invalid address for ld!!");
+        return NULL;
+    }
+
+    char* result = malloc(2048);
+    sprintf(result, "\txor %s,%s,%s\n", rd, rd, rd);
+
+    char tmp[64];
+    for (int shift = 52; shift >= 4; shift -= 12) {
+        sprintf(tmp, "\taddi %s,%lu\n", rd, (val >> shift));
+        strcat(result, tmp);
+        if (shift > 4) {
+            sprintf(tmp, "\tshftli %s,12\n", rd);
+            strcat(result, tmp);
+        }
+    }
+
+    sprintf(tmp, "\taddi %s,%lu\n", rd, (val & 0xF));
+    strcat(result, tmp);
+    sprintf(tmp, "\tshftli %s,4\n", rd);
+    strcat(result, tmp);
+    return result;
+}
+
+char* expandPush(char* rd) {
+    char* result = malloc(512);
+    sprintf(result, "\tmov (r31)(12),%s\n", rd);
+    strcat(result, "\taddi r31,12\n");
+    return result;
+}
+
+char* expandPop(char* rd) {
+    char* result = malloc(512);
+    result[0] = '\0';
+    strcat(result, "\tsubi r31,12\n");
+    char tmp[64];
+    sprintf(tmp, "\tmov %s,(r31)(12)\n", rd);
+    strcat(result, tmp);
+    return result;
+}
+
+char* expandClr(char* rd) {
+    char* result = malloc(256);
+    sprintf(result, "\txor %s,%s,%s\n", rd, rd, rd);
     return result;
 }
 
 int verifyRegister(char* c) {
+    if (strlen(c) == 0) {
+        perror("invalid length register!\n");
+        return 0;
+    }
+
     if (strlen(c) <= 1) {
         return 0;
     }
@@ -86,23 +120,17 @@ int verifyRegister(char* c) {
     for (int i = 1; c[i] != '\0'; i++) {
         if (!(c[i] - '0' >= 0 && c[i] - '0' < 10)) {
             first--;
+        } else {
+            first++;
         }
     }
     return first > 1;
 }
 
-/*
-1) L can only be a floating point number for the ld macro, which means you would use the IEEE representation for L in this case.  Every other instruction treats L as 12 bits which doesn't allow for floating points.
-
-2) Only if you're dealing with floating point numbers. IEEE is specifically for floating points so it wouldn't apply to integers. 
-
-*/
-
 int deciVerify(char* c, int flag) {
     if (!flag && c[0] == '-') {
         return 0;
     }
-
     for (int i = 0; c[i] != '\0'; i++) {
         if ((c[i] - '0' >= 0 || c[i] - '0' <= 9) || (i == 0 && c[0] == '-')) {
             continue;
@@ -118,71 +146,11 @@ int deciVerify(char* c, int flag) {
     } else if (!flag && num > pow(2, 12) - 1) {
         return 0;
     }
-
     return 1;
-}
-
-/*
-converting from integer to binary floating point form?
-12 bit integer, unsigned: 2^12 - 1, signed:  -2^11 ~ 2^11 - 1
-
-int deciVerify(char* c, int flag) {
-    if (!flag && c[0] == '-') {
-        return 0;
-    }
-
-    int deci = 0;
-    for (int i = 0; c[i] != '\0'; i++) {
-        if ((c[i] - '0' >= 0 || c[i] - '0' <= 9) || (i == 0 && c[0] == '-')) {
-            continue;
-        } else if (c[i] == '.') {
-            deci++;
-        } else {
-            return 0;
-        }
-        if (deci > 1) {
-            return 0;
-        }
-    }
-
-    long c = decimalToNum(c);
-
-    return c >= 0 ? 1 : 0;
-}
-*/
-
-/*converting from decimal to floating point form*/
-// long decimalToNum(char* c) {
-//     long num = 0;
-
-//     if (c[0] == '-') {
-
-//     }
-//     for (int i = 0; c[i] != '\0'; i++) {
-//         int n = c[i] - '0';
-        
-//         num = num*10 + n;
-
-//         if (num > pow(2, 12) - 1) {
-//             perror("Value out of bound");
-//             return -1;
-//         }
-//     }
-//     return num;
-// }
-
-unsigned int getAddress(char* val, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
-    for (int i = 0; i < labelCount; i++) {
-        if (strcmp(instructionLabel[i], val) == 0) {
-            return instructionAddress[i];
-        }
-    }
-    return -1;
 }
 
 char* getMacroLine(char* line, char** values, int count, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
     // rd, rd, rd
-    
     if (((strncmp(line, "\tadd", 4) == 0)
         || (strncmp(line, "\tsub", 4) == 0)
         || (strncmp(line, "\tmul", 4) == 0)
@@ -204,6 +172,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
                     return NULL;
                 }
             }
+
+            strcat(line, "\n");
             return line;
     }
 
@@ -216,6 +186,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
                     return NULL;
                 }
             }
+            strcat(line, "\n");
             return line;
     }
     
@@ -233,6 +204,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
                 perror("invalid register or decimal value in instruction line!");
                 return NULL;
             }
+            strcat(line, "\n");
             return line;
     }
 
@@ -244,6 +216,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
             perror("invalid register in instruction line!");
             return NULL;
         }
+        strcat(line, "\n");
         return line;
     }
 
@@ -253,6 +226,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
             perror("invalid decimal value in instruction line!");
             return NULL;
         }
+        strcat(line, "\n");
         return line;
     }
 
@@ -263,21 +237,22 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         if (!verifyRegister(values[0]) || !verifyRegister(values[1]) || !verifyRegister(values[2]) || !deciVerify(values[3], 0)) {
             return NULL;
         }
-
+        strcat(line, "\n");
         return line;
     }
 
-    // seperate case
+    // seperate macro case
     if (strncmp(line, "\tmov", 4) == 0 && count == 3) {
         if (strncmp(line, "\tmov (", 6) == 0 && count == 3) {
-            verifyRegister(values[0]);
-            deciVerify(values[1], 1);
-            verifyRegister(values[2]);
-            return line;
+            if (verifyRegister(values[0]) && deciVerify(values[1], 1) && verifyRegister(values[2])) {
+                strcat(line, "\n");
+                return line;
+            }
         } else {
-            verifyRegister(values[0]);
-            verifyRegister(values[1]);
-            deciVerify(values[2], 1);
+            if (verifyRegister(values[0]) && verifyRegister(values[1]) && deciVerify(values[2], 1)) {
+                strcat(line, "\n");
+                return line;
+            }
         }
     } else if (strncmp(line, "\tmov", 4) == 0 && count == 2) {
         if (verifyRegister(values[0]) && (verifyRegister(values[1]) || deciVerify(values[1], 0))) {
@@ -292,9 +267,9 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         if (verifyRegister(values[0]) && (verifyRegister(values[1]))) {
             char* result = malloc(256);
             if (strncmp(line, "\tout", 4) == 0) {
-                sprintf(result, "\tpriv %s,%s,r0,0x4\n", rd, rs);
+                sprintf(result, "\tpriv %s,%s,r0,0x4\n", values[0], values[1]);
             } else {
-                sprintf(result, "\tpriv %s,%s,r0,0x3\n", rd, rs);
+                sprintf(result, "\tpriv %s,%s,r0,0x3\n", values[0], values[1]);
             }
 
             return result;
@@ -307,85 +282,35 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         if (verifyRegister(values[0])) {
             return expandClr(values[0]);
         } else {
+            perror("invalid error!");
             return NULL;
         }
-        return out;
     }
-
     if (strncmp(line, "\tld", 3) == 0) {
         if (verifyRegister(values[0])) {
-            unsigned int val;
-            if (values[1][0] == ':') {
-                val = getAddress(val, instructionLabel, instructionAddress, labelCount);
-                
-                if (val == -1) {
-                    perror("invalid address!");
-                    return NULL;
-                }
-            } else if (deciVerify(values[1])) {
-                val = decimalToNum(value[1]);
-                // get the binary (unsigned int)
-                // then bit shift mask to get the numbers :)
-            } else {
-                perror("Invalid address for ld!!");
-                return NULL;
-            }
-            
-            char* out = line;
-            strcpy(out, "xor ");
-            strcat(out, values[0]);
-            strcat(out, ",");
-            strcat(out, values[0]);
-            strcat(out, ",");
-            strcat(out, values[0]);
-            strcat(out, "\naddi ");
-            strcat(out, values[0]);
-            strcat(out, ",");
-
-            char* valToString;
-            itoa(val>>52, valToString, 10);
-            strcat(out, valToString);
+            return expandLD(values[0], values[1], instructionLabel, instructionAddress, labelCount);
         }
     }
-
     if (strcmp(line, "\thalt") == 0) {
         return "\tpriv r0,r0,r0,0x0\n";
     }
 
+    // TODO
     if (strncmp(line, "\tpush", 5) == 0) {
-
-        
+        return expandPush(values[0]);
     }
     if (strncmp(line, "\tpop", 4) == 0) {
-
+        return expandPush(values[0]);
     }
 
     perror("non-existent instruction!");
     return NULL;
 }
 
-char* expandLD(char* rd, char* value, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount)
- {
-
- }
-
-char* expandPush(char* rd) {
-    char* result = malloc(512);
-    sprintf(result, "\tmov (r31)(12),%s");
-}
-
-char* expandPop(char* rd) {
-
-}
-
-char* expandClr(char* rd) {
-    char* result = malloc(256);
-    sprintf(result, "\txor %s,%s,%s\n", rd, rd, rd);
-    return result;
-}
 // first pass -> labels, 2nd pass: write to output
 int findAddress(char* file, char instructionLabel[][256], unsigned int* instructionAddress) {
-    char* line = strtok(file, "\n");
+    char* fileCopy = strdup(file);  
+    char* line = strtok(fileCopy, "\n");
     int labelNum = 0;
     unsigned int current = 0x1000;
 
@@ -420,6 +345,59 @@ int findAddress(char* file, char instructionLabel[][256], unsigned int* instruct
     return labelNum;
 }
 
+char* expandMacros(char* file, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
+    char* fileCopy = strdup(file);  
+
+    char* result = malloc(strlen(file) * 1024);
+    result[0] = '\0';
+
+    char *lineptr;
+    char* token = strtok_r(fileCopy, "\n", &lineptr);
+    char* values[4];
+
+    while (token != NULL) {
+        
+        if (strlen(token) > 0 && token[0] == '\t') {
+            char *macroptr;
+            char* part = strtok_r(strdup(token), "\t, ()", &macroptr);
+            int count = 0;
+            
+            while (part != NULL) {
+                if (count > 0) {
+                    values[count - 1] = strdup(part);
+                }
+                count++;
+                part = strtok_r(NULL, "\t, ()", &macroptr);
+            }
+            count--;
+
+            char* res = getMacroLine(token, values, count, instructionLabel, instructionAddress, labelCount);
+
+            if (res == NULL) {
+                free(fileCopy);
+                free(result);
+                return NULL;
+            }
+            
+            for (int i = 0; i < count; i++) {
+                free(values[i]);
+            }            
+            strcat(result, res);
+            // free(res);
+        } else {
+            if (token[0] != ':') {
+                strcat(result, token);
+                strcat(result, "\n");
+            }
+        }
+        token = strtok_r(NULL, "\n", &lineptr);
+    }
+
+    free(fileCopy);
+    return result;
+}
+
+
 int macroSize(char* line) {
     if (strncmp(line, "\tld", 3) == 0) return 12;
     if (strncmp(line, "\tpush", 5) == 0) return 2;
@@ -443,14 +421,20 @@ char* cleanFile(char* file) {
     long fileSize = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    char* cleaned = (char*) malloc(fileSize * sizeof(char));
+    char* cleaned = (char*) malloc(fileSize + 1);
+    if (!cleaned) {
+        perror("Malloc failed!");
+        return NULL;
+    }
+    cleaned[0] = '\0';
+
     char *line = NULL;
     size_t len = 0;
     int read;
     char* mode = ".code\n";
     while ((read = getline(&line, &len, f)) != -1) {
         if (line[0] == '.') {
-            if (strcmp(line, mode) != 0) {
+            if (strcmp(line, mode) != 0 || strlen(cleaned) == 0) {
                 if (strcmp(line, ".code\n") == 0) {
                     strcat(cleaned, ".code\n");
                     mode = ".code\n";
@@ -466,26 +450,25 @@ char* cleanFile(char* file) {
             }
         } else if (line[0] == '\t') {
             char* res = line;
-            int flag = 0;
+            char* cpy = line;
 
-            while(*line) {
-                if (*line != ' ') {
+            int flag = 0;
+            while(*cpy) {
+                if (*cpy != ' ') {
                     if(flag == 0) {
                         flag++;
                     }
-                    *res++ = *line;
-
+                    *res++ = *cpy;
                 } else if (flag == 1) {
+                    *res++ = *cpy;
                     flag++;
                 } else if (flag == 2) {
-                    *res++ = *line;
                     flag++;
                 }
-                line++;
+                cpy++;
             }
             *res = '\0';
-
-            strcat(cleaned, res);
+            strcat(cleaned, line);
         } else if (line[0] == ';') {
             continue;
         } else if (line[0] == ':') {
@@ -512,12 +495,13 @@ int main(int argc, char* argv[]) {
 
     char* cleanedFile = cleanFile(argv[1]);
 
+    printf("%s",cleanedFile);
     char instructionLabel[1024][256];
     unsigned int instructionAddress[1024];
     int labelCount = findAddress(cleanedFile, instructionLabel, instructionAddress);
 
     char* result = expandMacros(cleanedFile, instructionLabel, instructionAddress, labelCount);
 
-
+    printf("%s", result);
     return 0;
 }
