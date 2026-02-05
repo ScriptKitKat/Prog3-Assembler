@@ -7,165 +7,120 @@
 
 typedef struct {
     const char* name;
-    char* opcode;
+    unsigned int opcode;
 } OpcodeMap;
 
 static const OpcodeMap opcode_table[] = {
-    {"add", "11000"},
-    {"addi", "11001"},
-    {"sub", "11010"},
-    {"subi", "11011"},
-    {"mul", "11100"},
-    {"div", "11101"},
-    {"and", "00000"},
-    {"or", "00001"},
-    {"xor", "00010"},
-    {"not", "00011"},
-    {"shftr", "00100"},
-    {"shftri", "00101"},
-    {"shftl", "00110"},
-    {"shftli", "00111"},
-    {"br", "01000"},
-    {"brnz", "01011"},
-    {"call", "01100"},
-    {"return", "01101"},
-    {"brgt", "01110"},
-    {"priv", "01111"},
-    {"addf", "10010"},
-    {"subf", "10101"},
-    {"multf", "10110"},
-    {"divf", "10111"}
+    {"add", 0x18},
+    {"addi", 0x19},
+    {"sub", 0x1a},
+    {"subi", 0x1b},
+    {"mul", 0x1c},
+    {"div", 0x1d},
+    {"and", 0x0},
+    {"or", 0x1},
+    {"xor", 0x2},
+    {"not", 0x3},
+    {"shftr", 0x4},
+    {"shftri", 0x5},
+    {"shftl", 0x6},
+    {"shftli", 0x7},
+    {"br", 0x8},
+    {"brnz", 0xb},
+    {"call", 0xc},
+    {"return", 0xd},
+    {"brgt", 0xe},
+    {"priv", 0xf},
+    {"addf", 0x14},
+    {"subf", 0x15},
+    {"multf", 0x16},
+    {"divf", 0x17}
 };
 
-char* lookup_opcode(char *str) {
+uint32_t lookup_opcode(char *str) {
     for (int i = 0; i < sizeof(opcode_table)/sizeof(opcode_table[0]); i++) {
         if(strcmp(opcode_table[i].name, str) == 0) {
-            return opcode_table[i].opcode;
+            return (uint32_t) opcode_table[i].opcode;
         }
     }
-
-    return "";
+    return 0;
 }
 
-char* convertToBinaryString(char* num, int size) {
-    unsigned int binVal = atoi(num);
-    char* result = malloc(512);
-    result[0] = '\0';
-
-    for(int shift = size - 1; shift >= 0; shift--) {
-        if (binVal & (0x1 << shift)) {
-            strcat(result, "1");
-        } else {
-            strcat(result, "0");
-        }
-    }
-
-    return result;
-}
-
-char* getBinaryString(char** values, int count) {
-    char* result = malloc(512);
-    result[0] = '\0';
-
+uint32_t getBinaryInstruction(char** values, int count) {
+    uint32_t instructionLine = 0;
+    int shift = 27;
+    
     if (strcmp(values[0], "brr") == 0) {
         char* toConvert = values[1];
         int len = 12;
         if (toConvert[0] == 'r') {
-            strcat(result, "01001");
-            toConvert++;
-            len = 5;
+            instructionLine |= (0x9 << shift);
         } else {
-            strcat(result, "01010");
+            instructionLine |= (0x10 << shift);
         }
-        char* bin = convertToBinaryString(toConvert, len);
-        strcat(result, bin);
     } else if (strcmp(values[0], "mov") == 0) {
         if (count == 3) {
             if (values[2][0] == 'r') {
-                strcat(result, "10001");
-                for (int i = 1; i < count; i++) {
-                    char* toConvert = values[i];
-                    int len = 12;
-                    if (toConvert[0] == 'r') {
-                        toConvert++;
-                        len = 5;
-                    }
-                    char* bin = convertToBinaryString(toConvert, len);
-                    strcat(result, bin);
-                }
+                instructionLine |= (0x11 << shift);
             } else {
-                strcat(result, "10010");
-                for (int i = 1; i < count; i++) {
-                    char* toConvert = values[i];
-                    int len = 12;
-                    if (toConvert[0] == 'r') {
-                        toConvert++;
-                        len = 5;
-                    }
-                    char* bin = convertToBinaryString(toConvert, len);
-                    strcat(result, bin);
-                }
+                instructionLine |= (0x12 << shift);
             }
         } else if (count == 4) {
             if (values[2][0] == 'r') {
-                strcat(result, "10000");
-                for (int i = 1; i < count; i++) {
-                    char* toConvert = values[i];
-                    int len = 12;
-                    if (toConvert[0] == 'r') {
-                        toConvert++;
-                        len = 5;
-                    }
-                    char* bin = convertToBinaryString(toConvert, len);
-                    strcat(result, bin);
-                }
+                instructionLine |= (0x10 << shift);
             } else {
-                strcat(result, "10011");
-                for (int i = 1; i < count; i++) {
-                    char* toConvert = values[i];
-                    int len = 12;
-                    if (toConvert[0] == 'r') {
-                        toConvert++;
-                        len = 5;
-                    }
-                    char* bin = convertToBinaryString(toConvert, len);
-                    strcat(result, bin);
-                }
+                instructionLine |= (0x13 << shift);
             }
         }
     } else {
-        strcat(result, lookup_opcode(values[0]));
-        for (int i = 1; i < count; i++) {
-            char* toConvert = values[i];
-            int len = 12;
-            if (toConvert[0] == 'r') {
-                toConvert++;
-                len = 5;
-            }
-            char* bin = convertToBinaryString(toConvert, len);
-            strcat(result, bin);
-        }
+        uint32_t code = lookup_opcode(values[0]);
+        instructionLine |= (code << shift);
     }
+    shift -= 5;
 
-    while(32 - strlen(result) > 0) {
-        strcat(result, "0");
+    for (int i = 1; i < count; i++) {
+        char* val = values[i];
+        uint32_t num_val;
+        int bits;
+
+        if(val[0] == 'r') {
+            num_val = atoi(val + 1);
+            bits = 5;
+        } else {
+            num_val = atoi(val);
+            bits = 12;
+        }
+
+        shift -= bits;
+
+        if (shift < 0) break;
+        
+        instructionLine |= (num_val & ((1 << bits) - 1) << (shift + bits));
     }
-    return result;
+    return instructionLine;
 }
 
-char* getBinary(char* file) {
+void writeBinary(char* file) {
     char* fileCopy = strdup(file);
-    char* result = malloc(strlen(file) * 1024);
 
-    result[0] = '\0';
+    FILE *fptr;
+
+    fptr = fopen("output.tko", "wb");
+
+    if (fptr == NULL) {
+        perror("Error: Could not open file.\n");
+        return;
+    }
+
     char *lineptr;
     char* token = strtok_r(fileCopy, "\n", &lineptr);
     char* values[5];
 
     char* mode = ".code";
+    int first = 0;
 
     while (token != NULL) {
-        if (strcmp(token, mode) != 0 || strlen(result) == 0) {
+        if (strcmp(token, mode) != 0 || first == 0) {
             if (strcmp(token, ".code") == 0) {
                 mode = ".code";
             } else if (strcmp(token, ".data") == 0) {
@@ -184,23 +139,24 @@ char* getBinary(char* file) {
                 part = strtok_r(NULL, "\t, ()", &macroptr);
             }
 
-            char* res = getBinaryString(values, count);
+            uint32_t res = getBinaryInstruction(values, count);
 
             if (res == NULL) {
                 free(fileCopy);
-                free(result);
                 return NULL;
             }
             for (int i = 0; i < count; i++) {
                 free(values[i]);
             }
-            strcat(result, res);
+
+            fwrite(&res, sizeof(uint32_t), 1, fptr);
         } 
         token = strtok_r(NULL, "\n", &lineptr);
+        first = 1;
     }
+    fclose(fptr);
 
     free(fileCopy);
-    return result;
 }
 
 int deciVerify64(char* c) {
@@ -282,8 +238,8 @@ char* expandPush(char* rd) {
     char* result = malloc(512);
     result[0] = '\0';
 
-    sprintf(result, "\tmov (r31)(0),%s\n", rd);
-    strcat(result, "\taddi r31,8\n");
+    sprintf(result, "\tmov (r31)(-8),%s\n", rd);
+    strcat(result, "\tsubi r31,8\n");
     return result;
 }
 
@@ -291,10 +247,10 @@ char* expandPop(char* rd) {
     char* result = malloc(512);
     result[0] = '\0';
 
-    strcat(result, "\tsubi r31,8\n");
     char tmp[64];
-    sprintf(tmp, "\tmov 0,(r31)(%s)\n", rd);
+    sprintf(tmp, "\tmov %s,(r31)(0)\n", rd);
     strcat(result, tmp);
+    strcat(result, "\taddi r31,8\n");
     return result;
 }
 
@@ -625,8 +581,7 @@ int main(int argc, char* argv[]) {
     char* result = expandMacros(cleanedFile, instructionLabel, instructionAddress, labelCount);
     writeToFile(result, "int.tk");
 
-    char* bin = getBinary(result);
-    writeToFile(bin, "output.tko");
+    writeBinary(result);
 
     return 0;
 }
