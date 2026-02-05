@@ -586,6 +586,10 @@ int main(int argc, char* argv[]) {
     
     char* result = expandMacros(cleanedFile, instructionLabel, instructionAddress, labelCount);
 
+    if (result == NULL) {
+        perror("Invalid macro!\n");
+        return 1;
+    }
     writeToFile(result, argv[2]);
     writeBinary(result, argv[3]);
 
