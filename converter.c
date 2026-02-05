@@ -92,11 +92,14 @@ uint32_t getBinaryInstruction(char** values, int count) {
             bits = 12;
         }
 
-        shift -= bits;
-
-        if (shift < 0) break;
         
-        instructionLine |= ((num_val & ((1 << bits) - 1)) << (shift + bits));
+        if (shift < 0) break;
+        if (bits != 12) {
+            shift -= bits;
+            instructionLine |= ((num_val & ((1 << bits) - 1)) << (shift + bits));
+        } else {
+            instructionLine |= ((num_val & ((1 << bits) - 1)) );
+        }
     }
     return instructionLine;
 }
@@ -150,6 +153,7 @@ void writeBinary(char* file) {
                 free(values[i]);
             }
 
+            // cut off??
             // for (int sh = 31; sh >= 0; sh--) {
             //     printf("%d", (res >> sh & 1));
             // }
