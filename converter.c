@@ -257,7 +257,7 @@ char* expandPop(char* rd) {
     result[0] = '\0';
 
     char tmp[64];
-    sprintf(tmp, "\tmov %s, (r31)(0)\n", rd);
+    sprintf(tmp, "\tmov %s, (r31)(-8)\n", rd);
     strcat(result, tmp);
     strcat(result, "\taddi r31, 8\n");
     return result;
