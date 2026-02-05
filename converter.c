@@ -80,6 +80,7 @@ uint32_t getBinaryInstruction(char** values, int count) {
 
     for (int i = 1; i < count; i++) {
         char* val = values[i];
+
         uint32_t num_val;
         int bits;
 
@@ -95,7 +96,7 @@ uint32_t getBinaryInstruction(char** values, int count) {
 
         if (shift < 0) break;
         
-        instructionLine |= (num_val & ((1 << bits) - 1) << (shift + bits));
+        instructionLine |= ((num_val & ((1 << bits) - 1)) << (shift + bits));
     }
     return instructionLine;
 }
@@ -149,6 +150,10 @@ void writeBinary(char* file) {
                 free(values[i]);
             }
 
+            // for (int sh = 31; sh >= 0; sh--) {
+            //     printf("%d", (res >> sh & 1));
+            // }
+            // printf("\n");
             fwrite(&res, sizeof(uint32_t), 1, fptr);
         } 
         token = strtok_r(NULL, "\n", &lineptr);
@@ -297,7 +302,6 @@ int deciVerify(char* c, int flag) {
         if ((c[i] - '0' >= 0 || c[i] - '0' <= 9) || (i == 0 && c[0] == '-')) {
             continue;
         } else {
-            printf("here");
             return 0;
         }
     }
@@ -306,7 +310,6 @@ int deciVerify(char* c, int flag) {
 
     if (flag) {
         if (num < 0 && abs(num) > pow(2, 11)) {
-            printf("here: %d", abs(num));
             return 0;
         } else if (num >= 0 && num > pow(2, 11) - 1) {
             return 0;

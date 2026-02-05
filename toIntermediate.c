@@ -72,6 +72,9 @@ char* cleanFile(char* file) {
                         gotSpace = 1;
                     } else if (*src != ' ' && *src != '\t') {
                         *dst++ = *src;
+                        // if (*src != ',' && *src != ')') {
+
+                        // }
                     }
                 } else {
                     if (*src != ' ' && *src != '\t') {
@@ -87,8 +90,8 @@ char* cleanFile(char* file) {
         } else if (line[0] == ':') {
             strcat(cleaned, line);
         } else {
+            printf("line: %s",line);
             perror("Invalid Line!");
-            printf("Line: %s", line);
             free(cleaned);
             fclose(f);
             return NULL;
