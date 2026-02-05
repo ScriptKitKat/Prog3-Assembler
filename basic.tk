@@ -1,2 +1,2 @@
 .code
-	add      r0,         r21,    r1
+	adde      r0,         r21,    r1
