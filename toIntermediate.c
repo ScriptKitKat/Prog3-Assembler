@@ -36,7 +36,7 @@ char* handleTabs(char* line) {
 
 int checkLabel(char* ch) {
     for (int i = 0; ch[i] != '\0'; i++) {
-        if (ch == ' ' || ch == '\t') {
+        if (ch[i] == ' ' || ch[i] == '\t') {
             return 0;
         }
     }
@@ -96,7 +96,7 @@ char* cleanFile(char* file) {
             if (checkLabel(line)) {
                 strcat(cleaned, line);
             } else {
-                perror("Invalid Line!");
+                perror("Invalid label line!");
                 return NULL;
             }
         } else {
