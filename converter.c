@@ -66,7 +66,7 @@ char* convertToBinaryString(char* num, int size) {
 char* getBinaryString(char** values, int count) {
     char* result = malloc(512);
     result[0] = '\0';
-    
+
     if (strcmp(values[0], "brr") == 0) {
         char* toConvert = values[1];
         int len = 12;
@@ -479,9 +479,9 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         if (verifyRegister(values[0]) && (verifyRegister(values[1]))) {
             char* result = malloc(256);
             if (strncmp(line, "\tout", 4) == 0) {
-                sprintf(result, "\tpriv %s,%s,r0,0x4\n", values[0], values[1]);
+                sprintf(result, "\tpriv %s,%s,r0,4\n", values[0], values[1]);
             } else {
-                sprintf(result, "\tpriv %s,%s,r0,0x3\n", values[0], values[1]);
+                sprintf(result, "\tpriv %s,%s,r0,3\n", values[0], values[1]);
             }
 
             return result;
@@ -504,7 +504,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         }
     }
     if (strcmp(line, "\thalt") == 0) {
-        return "\tpriv r0,r0,r0,0x0\n";
+        return "\tpriv r0,r0,r0,0\n";
     }
 
     // TODO
