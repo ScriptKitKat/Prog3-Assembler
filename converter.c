@@ -26,7 +26,120 @@ write (binfile, "out.tko")
 #include <string.h>
 #include <math.h>
 #include <stdint.h>
+typedef struct {
+    const char* name;
+    char* opcode;
+} OpcodeMap;
 
+static const OpcodeMap opcode_table[] = {
+    {"add", "11000"},
+    {"addi", "11001"},
+    {"sub", "11010"},
+    {"subi", "11011"},
+    {"mul", "11100"},
+    {"div", "11101"},
+    {"and", "00000"},
+    {"or", "00001"},
+    {"xor", "00010"},
+    {"not", "00011"},
+    {"shftr", "00100"},
+    {"shftri", "00101"},
+    {"shftl", "00110"},
+    {"shftli", "00111"},
+    {"br", "01000"},
+    {"brnz", "01011"},
+    {"call", "01100"},
+    {"return", "01101"},
+    {"brgt", "01110"},
+    {"priv", "01111"},
+    {"addf", "10010"},
+    {"subf", "10101"},
+    {"multf", "10110"},
+    {"divf", "10111"}
+};
+
+char* lookup_opcode(char *str) {
+    for (int i = 0; i < sizeof(opcode_table)/sizeof(opcode_table[0]); i++) {
+        if(strcmp(opcode_table[i].name, str) == 0) {
+            return opcode_table[i].opcode;
+        }
+    }
+
+    return "";
+}
+
+char* getBinary(char* file) {
+    char* fileCopy = strdup(file);
+    char* result = malloc(strlen(file) * 1024);
+
+    result[0] = '\0';
+    char *lineptr;
+    char* token = strtok_r(fileCopy, "\n", &lineptr);
+    char* values[5];
+
+    char* mode = ".code";
+
+    while (token != NULL) {
+        if (strcmp(token, mode) != 0 || strlen(result) == 0) {
+            if (strcmp(token, ".code") == 0) {
+                mode = ".code";
+            } else if (strcmp(token, ".data") == 0) {
+                mode = ".data";
+            }
+        }
+        if (strlen(token) > 0 && token[0] == '\t' && strcmp(mode, ".code") == 0) {
+            char *macroptr;
+            char* dup = strdup(token);
+            char* part = strtok_r(dup, "\t, ()", &macroptr);
+            int count = 0;
+            
+            while (part != NULL) {
+                values[count] = strdup(part);
+                count++;
+                part = strtok_r(NULL, "\t, ()", &macroptr);
+            }
+
+            char* res = getBinary(token);
+
+            if (res == NULL) {
+                free(fileCopy);
+                free(result);
+                return NULL;
+            }
+            for (int i = 0; i < count; i++) {
+                free(values[i]);
+            }            
+            strcat(result, res);
+        } 
+        token = strtok_r(NULL, "\n", &lineptr);
+    }
+
+    free(fileCopy);
+    return result;
+}
+
+int deciVerify64(char* c) {
+    if (c[0] == '-') {
+        return 0;
+    }
+    long num = 0;
+
+    for (int i = 0; c[i] != '\0'; i++) {
+        if (c[i] - '0' >= 0 || c[i] - '0' <= 9) {
+            if (num > (pow(2, 64) - 1) / 10) {
+                perror("Num out of range!");
+                return 0;
+            } else {
+                num = c[i] + num*10;
+            }
+            continue;
+        } else {
+            perror("Not a number!");
+            return 0;
+        }
+    }
+    return 1;
+}
 
 uint64_t getAddress(char* val, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
     for (int i = 0; i < labelCount; i++) {
@@ -53,7 +166,7 @@ char* expandLD(char* rd, char* value, char instructionLabel[][256], unsigned int
             perror("invalid label address!");
             return NULL;
         }
-    } else if (deciVerify(value, 0)) { // // check this todo
+    } else if (deciVerify64(value)) { // // check this todo
         val = strtoull(value, NULL, 0);
     } else {
         perror("Invalid address for ld!!");
@@ -65,7 +178,7 @@ char* expandLD(char* rd, char* value, char instructionLabel[][256], unsigned int
 
     char tmp[64];
     for (int shift = 52; shift >= 4; shift -= 12) {
-        sprintf(tmp, "\taddi %s,%lu\n", rd, (val >> shift));
+        sprintf(tmp, "\taddi %s,%lu\n", rd, (val >> shift &0xFFF));
         strcat(result, tmp);
         if (shift > 4) {
             sprintf(tmp, "\tshftli %s,12\n", rd);
