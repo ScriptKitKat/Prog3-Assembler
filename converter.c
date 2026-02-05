@@ -279,6 +279,9 @@ char* expandLD(char* rd, char* value, char instructionLabel[][256], unsigned int
 }
 
 char* expandPush(char* rd) {
+    char* result = malloc(512);
+    result[0] = '\0';
+
     sprintf(result, "\tmov (r31)(0),%s\n", rd);
     strcat(result, "\taddi r31,8\n");
     return result;
@@ -288,9 +291,9 @@ char* expandPop(char* rd) {
     char* result = malloc(512);
     result[0] = '\0';
 
-    strcat(result, "\tsubi r31,12\n");
+    strcat(result, "\tsubi r31,8\n");
     char tmp[64];
-    sprintf(tmp, "\tmov %s,(r31)(12)\n", rd);
+    sprintf(tmp, "\tmov 0,(r31)(%s)\n", rd);
     strcat(result, tmp);
     return result;
 }
@@ -615,7 +618,6 @@ int main(int argc, char* argv[]) {
 
     char* cleanedFile = cleanFile(argv[1]);
 
-    printf("cleanedFile:\n%s", cleanedFile);
     char instructionLabel[1024][256];
     unsigned int instructionAddress[1024];
     int labelCount = findAddress(cleanedFile, instructionLabel, instructionAddress);
