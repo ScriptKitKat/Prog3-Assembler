@@ -5,6 +5,69 @@
 #include <stdint.h>
 #include "toIntermediate.h"
 
+char* handleTabs(char* line) {
+    char* src = malloc(sizeof(char) * strlen(line) * 2);
+    int inOpcode = 0;
+    int gotSpace = 0;
+
+    src[0] = '\t';
+    int index = 1;
+    for (int i = 1; line[i] != '\0'; i++) {
+        if (line[i] != ' ' && line[i] != '\t') {
+            src[index++] = line[i];
+            if (line[i] == ',') {
+                gotSpace = 0;
+            }
+            if (inOpcode == 0) {
+                inOpcode = 1;
+            }
+        } else if (inOpcode == 1) {
+            inOpcode = 2;
+        }
+        if (inOpcode == 2 && !gotSpace) {
+            src[index++] = ' ';
+            gotSpace = 1;
+        }
+    }
+    src[index] = '\0';
+
+    return src;
+
+    // while(*src) {
+    //     if (!sawTab) {
+    //         if (*src == '\t') {
+    //             *dst++ = *src;
+    //             sawTab = 1;
+    //         }
+    //     } else if (inOpcode == 0) {
+    //         if (*src != ' ' && *src != '\t') {
+    //             *dst++ = *src;
+    //             inOpcode = 1;
+    //         }
+    //     } else if (inOpcode == 1 && !gotSpace) {
+    //         if (*src == ' ') {
+    //             *dst++ = ' ';
+    //             gotSpace = 1;
+    //         } else if (*src != ' ' && *src != '\t') {
+    //             *dst++ = *src;
+    //             if (*src == ',') {
+    //                 gotSpace = 0;
+    //             }
+    //         }
+    //     } else {
+    //         if (*src != ' ' && *src != '\t') {
+    //             *dst++ = *src;
+    //             if (*src == ',') {
+    //                 gotSpace = 0;
+    //             }
+    //         }
+    //     }
+    //     src++;
+    // }
+    // *dst = '\0';
+    // return line;
+}
+
 char* cleanFile(char* file) {
     if (strlen(file) <= 0) {
         perror("Invalid file name length");
@@ -49,45 +112,8 @@ char* cleanFile(char* file) {
                 }
             }
         } else if (line[0] == '\t') {
-            char* src = line;
-            char* dst = line;
-
-            int sawTab = 0;
-            int inOpcode = 0;
-            int gotSpace = 0;
-            while(*src) {
-                if (!sawTab) {
-                    if (*src == '\t') {
-                        *dst++ = *src;
-                        sawTab = 1;
-                    }
-                } else if (inOpcode == 0) {
-                    if (*src != ' ' && *src != '\t') {
-                        *dst++ = *src;
-                        inOpcode = 1;
-                    }
-                } else if (inOpcode == 1 && !gotSpace) {
-                    if (*src == ' ') {
-                        *dst++ = ' ';
-                        gotSpace = 1;
-                    } else if (*src != ' ' && *src != '\t') {
-                        if (*src == ',') {
-                            gotSpace = 0;
-                        }
-                        *dst++ = *src;
-                    }
-                } else {
-                    if (*src != ' ' && *src != '\t') {
-                        if (*src == ',') {
-                            gotSpace = 0;
-                        }
-                        *dst++ = *src;
-                    }
-                }
-                src++;
-            }
-            *dst = '\0';
-            strcat(cleaned, line);
+            char* res = handleTabs(line);
+            strcat(cleaned, res);
         } else if (line[0] == ';') {
             continue;
         } else if (line[0] == ':') {
