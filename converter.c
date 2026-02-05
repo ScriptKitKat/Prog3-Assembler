@@ -264,16 +264,16 @@ char* expandLD(char* rd, char* value, char instructionLabel[][256], unsigned int
     char tmp[64];
     for (int shift = 52; shift >= 4; shift -= 12) {
         sprintf(tmp, "\taddi %s,%lu\n", rd, (val >> shift &0xFFF));
+        // 52, 40, 28, 16, 4
         strcat(result, tmp);
         if (shift > 4) {
             sprintf(tmp, "\tshftli %s,12\n", rd);
             strcat(result, tmp);
         }
     }
-
-    sprintf(tmp, "\taddi %s,%lu\n", rd, (val & 0xF));
-    strcat(result, tmp);
     sprintf(tmp, "\tshftli %s,4\n", rd);
+    strcat(result, tmp);
+    sprintf(tmp, "\taddi %s,%lu\n", rd, (val & 0xF));
     strcat(result, tmp);
     return result;
 }
