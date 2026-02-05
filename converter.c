@@ -68,6 +68,112 @@ char* lookup_opcode(char *str) {
     return "";
 }
 
+char* convertToBinaryString(char* num, int size) {
+    unsigned int binVal = atoi(num);
+    char* result = malloc(512);
+    result[0] = '\0';
+
+    for(int shift = size - 1; shift >= 0; shift--) {
+        if (binVal & (0x1 << shift)) {
+            strcat(result, "1");
+        } else {
+            strcat(result, "0");
+        }
+    }
+
+    return result;
+}
+
+char* getBinaryString(char** values, int count) {
+    char* result = malloc(512);
+    result[0] = '\0';
+
+    if (strcmp(values[0], "brr") == 0) {
+        char* toConvert = values[1];
+        int len = 12;
+        if (toConvert[0] == 'r') {
+            strcat(result, "01001");
+            toConvert++;
+            len = 5;
+        } else {
+            strcat(result, "01010");
+        }
+        char* bin = convertToBinaryString(toConvert, len);
+        strcat(result, bin);
+    } else if (strcmp(values[0], "mov") == 0) {
+        if (count == 3) {
+            if (values[2][0] == 'r') {
+                strcat(result, "10001");
+                for (int i = 1; i < count; i++) {
+                    char* toConvert = values[i];
+                    int len = 12;
+                    if (toConvert[0] == 'r') {
+                        toConvert++;
+                        len = 5;
+                    }
+                    char* bin = convertToBinaryString(toConvert, len);
+                    strcat(result, bin);
+                }
+            } else {
+                strcat(result, "10010");
+                for (int i = 1; i < count; i++) {
+                    char* toConvert = values[i];
+                    int len = 12;
+                    if (toConvert[0] == 'r') {
+                        toConvert++;
+                        len = 5;
+                    }
+                    char* bin = convertToBinaryString(toConvert, len);
+                    strcat(result, bin);
+                }
+            }
+        } else if (count == 4) {
+            if (values[2][0] == 'r') {
+                strcat(result, "10000");
+                for (int i = 1; i < count; i++) {
+                    char* toConvert = values[i];
+                    int len = 12;
+                    if (toConvert[0] == 'r') {
+                        toConvert++;
+                        len = 5;
+                    }
+                    char* bin = convertToBinaryString(toConvert, len);
+                    strcat(result, bin);
+                }
+            } else {
+                strcat(result, "10011");
+                for (int i = 1; i < count; i++) {
+                    char* toConvert = values[i];
+                    int len = 12;
+                    if (toConvert[0] == 'r') {
+                        toConvert++;
+                        len = 5;
+                    }
+                    char* bin = convertToBinaryString(toConvert, len);
+                    strcat(result, bin);
+                }
+            }
+        }
+    } else {
+        strcat(result, lookup_opcode(values[0]));
+        for (int i = 1; i < count; i++) {
+            char* toConvert = values[i];
+            int len = 12;
+            if (toConvert[0] == 'r') {
+                toConvert++;
+                len = 5;
+            }
+            char* bin = convertToBinaryString(toConvert, len);
+            strcat(result, bin);
+        }
+    }
+
+    while(32 - strlen(result) > 0) {
+        strcat(result, "0");
+    }
+    return result;
+}
+
 char* getBinary(char* file) {
     char* fileCopy = strdup(file);
     char* result = malloc(strlen(file) * 1024);
@@ -99,7 +205,7 @@ char* getBinary(char* file) {
                 part = strtok_r(NULL, "\t, ()", &macroptr);
             }
 
-            char* res = getBinary(token);
+            char* res = getBinaryString(values, count);
 
             if (res == NULL) {
                 free(fileCopy);
@@ -108,7 +214,7 @@ char* getBinary(char* file) {
             }
             for (int i = 0; i < count; i++) {
                 free(values[i]);
-            }            
+            }
             strcat(result, res);
         } 
         token = strtok_r(NULL, "\n", &lineptr);
@@ -612,6 +718,22 @@ char* cleanFile(char* file) {
     return cleaned;
 }
 
+void writeToFile(char* toWrite, char* name) {
+
+    FILE *fptr;
+
+    fptr = fopen(name, "w");
+
+    if (fptr == NULL) {
+        perror("Error: Could not open file.\n");
+        return;
+    }
+
+    fputs(toWrite, fptr);
+
+    fclose(fptr);
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         perror("Error: invalid number of inputs!");
@@ -624,9 +746,11 @@ int main(int argc, char* argv[]) {
     unsigned int instructionAddress[1024];
     int labelCount = findAddress(cleanedFile, instructionLabel, instructionAddress);
     
-    printf("%s",cleanedFile);
     char* result = expandMacros(cleanedFile, instructionLabel, instructionAddress, labelCount);
+    writeToFile(result, "out.tk");
 
-    printf("%s", result);
+    char* bin = getBinary(result);
+    writeToFile(bin, "output.tko");
+
     return 0;
 }

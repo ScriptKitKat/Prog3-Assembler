@@ -1,0 +1,18 @@
+.code
+	xor r0,r0,r0
+	xor r5,r5,r5
+	addi r5,7
+	shftli r5,12
+	addi r5,2765
+	shftli r5,12
+	addi r5,3305
+	shftli r5,12
+	addi r5,1388
+	shftli r5,12
+	addi r5,187
+	addi r5,1
+	shftli r5,4
+	br r5
+	priv r0,r0,r0,0x0
+.data
+	35
