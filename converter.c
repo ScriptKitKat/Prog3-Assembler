@@ -324,6 +324,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     char* result = malloc(512);
 
     char* opcode = values[0];
+
     // rd, rd, rd
     if (((strcmp(opcode, "add") == 0)
         || (strcmp(opcode, "sub") == 0)
@@ -352,8 +353,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     }
 
     // rd, rd
-    if ((strcmp(line, "brnz") == 0)
-        || (strcmp(line, "not") == 0)) {
+    if ((strcmp(opcode, "brnz") == 0)
+        || (strcmp(opcode, "not") == 0)) {
             for (int i = 1; i < count; i++) {
                 if (!verifyRegister(values[i])) {
                     perror("invalid register in instruction line!");
@@ -369,12 +370,12 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     Unsigned literals: addi, subi, shftli, shftri, mov rd, L, ld
     Signed literals: brr, mov rd, (rs)(L), mov (rd)(L), rs
     */
-    if (((strcmp(line, "addi") == 0)
-        || (strcmp(line, "subi") == 0)
-        || (strcmp(line, "shftri") == 0)
-        || (strcmp(line, "shftli") == 0))
+    if (((strcmp(opcode, "addi") == 0)
+        || (strcmp(opcode, "subi") == 0)
+        || (strcmp(opcode, "shftri") == 0)
+        || (strcmp(opcode, "shftli") == 0))
         && count == 3) {
-            if (!verifyRegister(values[0]) || !deciVerify(values[1], 0)) {
+            if (!verifyRegister(values[1]) || !deciVerify(values[2], 0)) {
                 perror("invalid register or decimal value in instruction line!");
                 return NULL;
             }
@@ -383,10 +384,10 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     }
 
     // rd
-    if (((strcmp(line, "br") == 0)
-    || (strcmp(line, "call") == 0))
+    if (((strcmp(opcode, "br") == 0)
+    || (strcmp(opcode, "call") == 0))
     && count == 2) {
-        if (!verifyRegister(values[0])) {
+        if (!verifyRegister(values[1])) {
             perror("invalid register in instruction line!");
             return NULL;
         }
@@ -395,7 +396,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     }
 
     // L
-    if (strcmp(line, "brr") == 0) {
+    if (strcmp(opcode, "brr") == 0) {
         if (!deciVerify(values[1], 1)) {
             perror("invalid decimal value in instruction line!");
             return NULL;
@@ -404,11 +405,11 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         return result;
     }
 
-    if (strcmp(line, "return") == 0 && count == 1) return line;
+    if (strcmp(opcode, "return") == 0 && count == 1) return line;
 
     // 5 arguments
-    if (strcmp(line, "priv") == 0) {
-        if (!verifyRegister(values[0]) || !verifyRegister(values[1]) || !verifyRegister(values[2]) || !deciVerify(values[3], 0)) {
+    if (strcmp(opcode, "priv") == 0) {
+        if (!verifyRegister(values[1]) || !verifyRegister(values[2]) || !verifyRegister(values[3]) || !deciVerify(values[4], 0)) {
             return NULL;
         }
         sprintf(result, "%s\n", line);
@@ -418,18 +419,18 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     // seperate macro case
     if (strcmp(opcode, "mov") == 0 && count == 4) {
         if (strncmp(line, "\tmov (", 6) == 0 && count == 4) {
-            if (verifyRegister(values[0]) && deciVerify(values[1], 1) && verifyRegister(values[2])) {
+            if (verifyRegister(values[1]) && deciVerify(values[2], 1) && verifyRegister(values[3])) {
                 sprintf(result, "%s\n", line);
                 return result;
             }
         } else {
-            if (verifyRegister(values[0]) && verifyRegister(values[1]) && deciVerify(values[2], 1)) {
+            if (verifyRegister(values[1]) && verifyRegister(values[2]) && deciVerify(values[3], 1)) {
                 sprintf(result, "%s\n", line);
                 return result;
             }
         }
     } else if (strcmp(opcode, "mov") == 0 && count == 3) {
-        if (verifyRegister(values[0]) && (verifyRegister(values[1]) || deciVerify(values[1], 0))) {
+        if (verifyRegister(values[1]) && (verifyRegister(values[2]) || deciVerify(values[2], 0))) {
             sprintf(result, "%s\n", line);
             return result;
         } else {
@@ -439,12 +440,12 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     }
 
     if (strcmp(opcode, "in") == 0 || strcmp(opcode, "out") == 0) {
-        if (verifyRegister(values[0]) && (verifyRegister(values[1]))) {
+        if (verifyRegister(values[1]) && (verifyRegister(values[2]))) {
             char* result = malloc(256);
             if (strcmp(opcode, "out") == 0) {
-                sprintf(result, "\tpriv %s ,%s, r0, 4\n", values[0], values[1]);
+                sprintf(result, "\tpriv %s ,%s, r0, 4\n", values[1], values[2]);
             } else {
-                sprintf(result, "\tpriv %s, %s, r0, 3\n", values[0], values[1]);
+                sprintf(result, "\tpriv %s, %s, r0, 3\n", values[1], values[2]);
             }
 
             return result;
@@ -454,16 +455,16 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     }
 
     if (strcmp(opcode, "clr") == 0) {
-        if (verifyRegister(values[0])) {
-            return expandClr(values[0]);
+        if (verifyRegister(values[1])) {
+            return expandClr(values[1]);
         } else {
             perror("invalid error!");
             return NULL;
         }
     }
     if (strcmp(opcode, "ld") == 0) {
-        if (verifyRegister(values[0])) {
-            return expandLD(values[0], values[1], instructionLabel, instructionAddress, labelCount);
+        if (verifyRegister(values[1])) {
+            return expandLD(values[1], values[2], instructionLabel, instructionAddress, labelCount);
         }
     }
     if (strcmp(opcode, "halt") == 0) {
@@ -472,16 +473,21 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
 
     // TODO
     if (strcmp(opcode, "push") == 0) {
-        if (verifyRegister(values[0])) {
-            return expandPush(values[0]);
+        if (verifyRegister(values[1])) {
+            return expandPush(values[1]);
+        } else {
+            perror("invalid register!\n");
         }
     }
     if (strcmp(opcode, "pop") == 0) {
-        if (verifyRegister(values[0])) {
-            return expandPop(values[0]);
+        if (verifyRegister(values[1])) {
+            return expandPop(values[1]);
+        } else {
+            perror("invalid register!\n");
         }
     }
 
+    printf("line: %s\n", line);
     perror("non-existent instruction!");
     return NULL;
 }
@@ -573,6 +579,7 @@ int main(int argc, char* argv[]) {
     }
 
     char* cleanedFile = cleanFile(argv[1]);
+
     char instructionLabel[1024][256];
     unsigned int instructionAddress[1024];
     int labelCount = findAddress(cleanedFile, instructionLabel, instructionAddress);

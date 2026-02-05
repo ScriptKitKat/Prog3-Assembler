@@ -32,40 +32,6 @@ char* handleTabs(char* line) {
     src[index] = '\0';
 
     return src;
-
-    // while(*src) {
-    //     if (!sawTab) {
-    //         if (*src == '\t') {
-    //             *dst++ = *src;
-    //             sawTab = 1;
-    //         }
-    //     } else if (inOpcode == 0) {
-    //         if (*src != ' ' && *src != '\t') {
-    //             *dst++ = *src;
-    //             inOpcode = 1;
-    //         }
-    //     } else if (inOpcode == 1 && !gotSpace) {
-    //         if (*src == ' ') {
-    //             *dst++ = ' ';
-    //             gotSpace = 1;
-    //         } else if (*src != ' ' && *src != '\t') {
-    //             *dst++ = *src;
-    //             if (*src == ',') {
-    //                 gotSpace = 0;
-    //             }
-    //         }
-    //     } else {
-    //         if (*src != ' ' && *src != '\t') {
-    //             *dst++ = *src;
-    //             if (*src == ',') {
-    //                 gotSpace = 0;
-    //             }
-    //         }
-    //     }
-    //     src++;
-    // }
-    // *dst = '\0';
-    // return line;
 }
 
 char* cleanFile(char* file) {
