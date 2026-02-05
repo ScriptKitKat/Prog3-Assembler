@@ -66,7 +66,7 @@ char* convertToBinaryString(char* num, int size) {
 char* getBinaryString(char** values, int count) {
     char* result = malloc(512);
     result[0] = '\0';
-
+    
     if (strcmp(values[0], "brr") == 0) {
         char* toConvert = values[1];
         int len = 12;
@@ -310,6 +310,7 @@ int verifyRegister(char* c) {
     if (strlen(c) <= 1) {
         return 0;
     }
+
     int first = 0;
     if (c[0] == 'r') {
         first++;
@@ -325,24 +326,36 @@ int verifyRegister(char* c) {
 }
 
 int deciVerify(char* c, int flag) {
+    if (strlen(c) == 0) {
+        perror("number given has a length of 0!");
+        return 0;
+    }
     if (!flag && c[0] == '-') {
+        perror("Number is supposed to be unsigned!");
         return 0;
     }
     for (int i = 0; c[i] != '\0'; i++) {
         if ((c[i] - '0' >= 0 || c[i] - '0' <= 9) || (i == 0 && c[0] == '-')) {
             continue;
         } else {
+            printf("here");
             return 0;
         }
     }
 
     int num = atoi(c);
 
-    if (flag && abs(num) > pow(2, 11) - 1) {
-        return 0;
+    if (flag) {
+        if (num < 0 && abs(num) > pow(2, 11)) {
+            printf("here: %d", abs(num));
+            return 0;
+        } else if (num >= 0 && num > pow(2, 11) - 1) {
+            return 0;
+        }
     } else if (!flag && num > pow(2, 12) - 1) {
         return 0;
     }
+
     return 1;
 }
 
@@ -505,6 +518,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
             return expandPop(values[0]);
         }
     }
+
+    printf("non: %s", line);
     perror("non-existent instruction!");
     return NULL;
 }
@@ -600,6 +615,7 @@ int main(int argc, char* argv[]) {
 
     char* cleanedFile = cleanFile(argv[1]);
 
+    printf("cleanedFile:\n%s", cleanedFile);
     char instructionLabel[1024][256];
     unsigned int instructionAddress[1024];
     int labelCount = findAddress(cleanedFile, instructionLabel, instructionAddress);
