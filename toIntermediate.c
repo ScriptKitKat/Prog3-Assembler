@@ -34,6 +34,16 @@ char* handleTabs(char* line) {
     return src;
 }
 
+int checkLabel(char* ch) {
+    for (int i = 0; ch[i] != '\0'; i++) {
+        if (ch == ' ' || ch == '\t') {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 char* cleanFile(char* file) {
     if (strlen(file) <= 0) {
         perror("Invalid file name length");
@@ -83,9 +93,13 @@ char* cleanFile(char* file) {
         } else if (line[0] == ';') {
             continue;
         } else if (line[0] == ':') {
-            strcat(cleaned, line);
+            if (checkLabel(line)) {
+                strcat(cleaned, line);
+            } else {
+                perror("Invalid Line!");
+                return NULL;
+            }
         } else {
-            printf("line: %s",line);
             perror("Invalid Line!");
             free(cleaned);
             fclose(f);

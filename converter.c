@@ -587,6 +587,11 @@ int main(int argc, char* argv[]) {
 
     char* cleanedFile = cleanFile(argv[1]);
 
+    if (cleanedFile == NULL) {
+        perror("Invalid!\n");
+        return 1;
+    }
+
     char instructionLabel[1024][256];
     unsigned int instructionAddress[1024];
     int labelCount = findAddress(cleanedFile, instructionLabel, instructionAddress);
