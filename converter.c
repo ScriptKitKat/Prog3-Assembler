@@ -285,6 +285,13 @@ int verifyRegister(char* c) {
             first++;
         }
     }
+    int n = atoi(c + 1);
+
+    if (n < 0 || n > 31) {
+        perror("invalid register!\n");
+        return 0;
+    }
+
     return first > 1;
 }
 
