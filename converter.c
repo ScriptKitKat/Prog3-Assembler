@@ -224,21 +224,21 @@ char* expandLD(char* rd, char* value, char instructionLabel[][256], unsigned int
     }
 
     char* result = malloc(2048);
-    sprintf(result, "\txor %s,%s,%s\n", rd, rd, rd);
+    sprintf(result, "\txor %s, %s, %s\n", rd, rd, rd);
 
     char tmp[64];
     for (int shift = 52; shift >= 4; shift -= 12) {
-        sprintf(tmp, "\taddi %s,%lu\n", rd, (val >> shift &0xFFF));
+        sprintf(tmp, "\taddi %s, %lu\n", rd, (val >> shift &0xFFF));
         // 52, 40, 28, 16, 4
         strcat(result, tmp);
         if (shift > 4) {
-            sprintf(tmp, "\tshftli %s,12\n", rd);
+            sprintf(tmp, "\tshftli %s, 12\n", rd);
             strcat(result, tmp);
         }
     }
-    sprintf(tmp, "\tshftli %s,4\n", rd);
+    sprintf(tmp, "\tshftli %s, 4\n", rd);
     strcat(result, tmp);
-    sprintf(tmp, "\taddi %s,%lu\n", rd, (val & 0xF));
+    sprintf(tmp, "\taddi %s, %lu\n", rd, (val & 0xF));
     strcat(result, tmp);
     return result;
 }
@@ -247,8 +247,8 @@ char* expandPush(char* rd) {
     char* result = malloc(512);
     result[0] = '\0';
 
-    sprintf(result, "\tmov (r31)(-8),%s\n", rd);
-    strcat(result, "\tsubi r31,8\n");
+    sprintf(result, "\tmov (r31)(-8), %s\n", rd);
+    strcat(result, "\tsubi r31, 8\n");
     return result;
 }
 
@@ -257,15 +257,15 @@ char* expandPop(char* rd) {
     result[0] = '\0';
 
     char tmp[64];
-    sprintf(tmp, "\tmov %s,(r31)(0)\n", rd);
+    sprintf(tmp, "\tmov %s, (r31)(0)\n", rd);
     strcat(result, tmp);
-    strcat(result, "\taddi r31,8\n");
+    strcat(result, "\taddi r31, 8\n");
     return result;
 }
 
 char* expandClr(char* rd) {
     char* result = malloc(256);
-    sprintf(result, "\txor %s,%s,%s\n", rd, rd, rd);
+    sprintf(result, "\txor %s, %s, %s\n", rd, rd, rd);
     return result;
 }
 
@@ -445,9 +445,9 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         if (verifyRegister(values[0]) && (verifyRegister(values[1]))) {
             char* result = malloc(256);
             if (strncmp(line, "\tout", 4) == 0) {
-                sprintf(result, "\tpriv %s,%s,r0,4\n", values[0], values[1]);
+                sprintf(result, "\tpriv %s ,%s, r0, 4\n", values[0], values[1]);
             } else {
-                sprintf(result, "\tpriv %s,%s,r0,3\n", values[0], values[1]);
+                sprintf(result, "\tpriv %s, %s, r0, 3\n", values[0], values[1]);
             }
 
             return result;

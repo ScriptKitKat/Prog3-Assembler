@@ -71,13 +71,16 @@ char* cleanFile(char* file) {
                         *dst++ = ' ';
                         gotSpace = 1;
                     } else if (*src != ' ' && *src != '\t') {
+                        if (*src == ',') {
+                            gotSpace = 0;
+                        }
                         *dst++ = *src;
-                        // if (*src != ',' && *src != ')') {
-
-                        // }
                     }
                 } else {
                     if (*src != ' ' && *src != '\t') {
+                        if (*src == ',') {
+                            gotSpace = 0;
+                        }
                         *dst++ = *src;
                     }
                 }
