@@ -104,12 +104,12 @@ uint32_t getBinaryInstruction(char** values, int count) {
     return instructionLine;
 }
 
-void writeBinary(char* file) {
+void writeBinary(char* file, char* filepath) {
     char* fileCopy = strdup(file);
 
     FILE *fptr;
 
-    fptr = fopen("output.tko", "wb");
+    fptr = fopen(filepath, "wb");
 
     if (fptr == NULL) {
         perror("Error: Could not open file.\n");
@@ -574,7 +574,7 @@ void writeToFile(char* toWrite, char* name) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
+    if (argc != 4) {
         perror("Error: invalid number of inputs!");
         return 1;
     }
@@ -585,9 +585,10 @@ int main(int argc, char* argv[]) {
     int labelCount = findAddress(cleanedFile, instructionLabel, instructionAddress);
     
     char* result = expandMacros(cleanedFile, instructionLabel, instructionAddress, labelCount);
-    writeToFile(result, "int.tk");
 
-    writeBinary(result);
+    writeToFile(result, args[2]);
+
+    writeBinary(result, args[3]);
 
     return 0;
 }
