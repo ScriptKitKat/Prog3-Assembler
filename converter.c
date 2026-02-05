@@ -586,9 +586,9 @@ int main(int argc, char* argv[]) {
     
     char* result = expandMacros(cleanedFile, instructionLabel, instructionAddress, labelCount);
 
-    writeToFile(result, args[2]);
+    writeToFile(result, argv[2]);
 
-    writeBinary(result, args[3]);
+    writeBinary(result, argv[3]);
 
     return 0;
 }
