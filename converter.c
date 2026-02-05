@@ -580,9 +580,6 @@ int main(int argc, char* argv[]) {
     }
 
     char* cleanedFile = cleanFile(argv[1]);
-
-    printf("%s",cleanedFile);
-
     char instructionLabel[1024][256];
     unsigned int instructionAddress[1024];
     int labelCount = findAddress(cleanedFile, instructionLabel, instructionAddress);
