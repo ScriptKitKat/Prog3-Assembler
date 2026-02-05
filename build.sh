@@ -2,4 +2,4 @@
 
 #set -x
 
-gcc -g -Wall -Wextra converter.c -o hw3
+gcc -g -Wall -Wextra converter.c toIntermediate.c -o hw3 -I include
