@@ -279,15 +279,15 @@ char* expandLD(char* rd, char* value, char instructionLabel[][256], unsigned int
 }
 
 char* expandPush(char* rd) {
-    char* result = malloc(512);
-    sprintf(result, "\tmov (r31)(12),%s\n", rd);
-    strcat(result, "\taddi r31,12\n");
+    sprintf(result, "\tmov (r31)(0),%s\n", rd);
+    strcat(result, "\taddi r31,8\n");
     return result;
 }
 
 char* expandPop(char* rd) {
     char* result = malloc(512);
     result[0] = '\0';
+
     strcat(result, "\tsubi r31,12\n");
     char tmp[64];
     sprintf(tmp, "\tmov %s,(r31)(12)\n", rd);
