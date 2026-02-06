@@ -35,7 +35,7 @@ static const OpcodeMap opcode_table[] = {
     {"priv", 0xf},
     {"addf", 0x14},
     {"subf", 0x15},
-    {"multf", 0x16},
+    {"mulf", 0x16},
     {"divf", 0x17}
 };
 
