@@ -376,7 +376,7 @@ int movCase(char* line) {
 }
 
 char* getMacroLine(char* line, char** values, int count, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
-    char* result = malloc(512);
+    char* result = malloc(1024);
 
     char* opcode = values[0];
 
@@ -506,12 +506,13 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
 
     if (strcmp(opcode, "mov") == 0) {
         int caseMov = movCase(line);
-        sprintf(result, "%s\n", line);
         if (count == 3) {
             if (caseMov == 3 && verifyRegister(values[1]) && verifyRegister(values[2])) {
+                sprintf(result, "%s\n", line);
                 return result;
             }
             if (caseMov == 4 && verifyRegister(values[1]) && deciVerify(values[2], 0)) {
+                sprintf(result, "%s\n", line);
                 return result;
             }
 
@@ -527,6 +528,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         }
         if (count == 4) {
             if (caseMov == 2 && verifyRegister(values[1]) && deciVerify(values[2], 1) && verifyRegister(values[3])) {
+                sprintf(result, "%s\n", line);
                 return result;
             }
 
@@ -541,6 +543,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
             }
 
             if (caseMov == 1 && verifyRegister(values[1]) && verifyRegister(values[2]) && deciVerify(values[3], 1)) {
+                sprintf(result, "%s\n", line);
                 return result;
             }
 
@@ -617,7 +620,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
 
 char* expandMacros(char* file, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
     char* fileCopy = strdup(file);
-    char* result = malloc(strlen(file) * 1024);
+    char* result = malloc(strlen(file) * 2048);
     result[0] = '\0';
 
     char *lineptr;
