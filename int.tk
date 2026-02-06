@@ -12,17 +12,17 @@
 	brr r31
 	brr 920
 	xor r0, r0, r0
-	addi r0, 4095
+	addi r0, 0
 	shftli r0, 12
-	addi r0, 4095
+	addi r0, 167
 	shftli r0, 12
-	addi r0, 4095
+	addi r0, 3162
 	shftli r0, 12
-	addi r0, 4095
+	addi r0, 3143
 	shftli r0, 12
-	addi r0, 4095
+	addi r0, 436
 	shftli r0, 4
-	addi r0, 15
+	addi r0, 7
 	priv r1, r0, r0, 4
 	xor r0, r0, r0
 	addi r0, 0

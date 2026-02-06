@@ -294,8 +294,8 @@ int verifyRegister(char* c) {
 }
 
 int deciVerify(char* c, int flag) {
-    if (strlen(c) == 0) {
-        perror("number given has a length of 0!");
+    if (strlen(c) == 0 || c == NULL) {
+        perror("invalid number!");
         return 0;
     }
 
@@ -303,24 +303,25 @@ int deciVerify(char* c, int flag) {
         perror("Number is supposed to be unsigned!");
         return 0;
     }
-    for (int i = 0; c[i] != '\0'; i++) {
-        if ((c[i] - '0' >= 0 && c[i] - '0' <= 9) || (i == 0 && c[0] == '-')) {
-            continue;
-        } else {
-            return 0;
-        }
-    }
 
-    int num = atoi(c);
+    unsigned long long num = 0;
 
-    if (flag) {
-        if (num < 0 && abs(num) > pow(2, 11)) {
-            return 0;
-        } else if (num >= 0 && num > pow(2, 11) - 1) {
-            return 0;
+    for (int i = (c[0] == '-') ? 1 : 0; c[i] != '\0'; i++) {
+        if ((c[i] >= '0' && c[i] <= '9')) {
+            int digit = c[i] - '0';
+
+            if (flag) {
+                if (c[0] == '-' && num > 2048) {
+                    return 0;
+                } else if (num > 2047) {
+                    return 0;
+                }
+            } else if (!flag && num > 4095) {
+                return 0;
+            }
+            
+            num = (digit) + num*10;
         }
-    } else if (!flag && num > pow(2, 12) - 1) {
-        return 0;
     }
 
     return 1;
