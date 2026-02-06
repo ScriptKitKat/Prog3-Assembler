@@ -474,10 +474,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         return result;
     }
 
-    // seperate macro case
     if (strcmp(opcode, "mov") == 0) {
         int caseMov = movCase(line);
-
         sprintf(result, "%s\n", line);
         if (count == 3) {
             if (caseMov == 3 && verifyRegister(values[1]) && verifyRegister(values[2])) {
@@ -487,7 +485,6 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
                 return result;
             }
         }
-
         if (count == 4) {
             if (caseMov == 2 && verifyRegister(values[1]) && deciVerify(values[2], 1) && verifyRegister(values[3])) {
                 return result;

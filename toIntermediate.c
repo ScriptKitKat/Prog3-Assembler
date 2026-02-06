@@ -4,7 +4,8 @@
 #include <math.h>
 #include <stdint.h>
 #include "toIntermediate.h"
-
+#include <regex.h>
+#include <ctype.h>
 
 int macroSize(char* line) {
     if (strncmp(line, "\tld", 3) == 0) return 12;
@@ -43,13 +44,36 @@ char* handleTabs(char* line) {
 }
 
 int checkLabel(char* ch) {
-    for (int i = 0; ch[i] != '\0'; i++) {
-        if (ch[i] == ' ' || ch[i] == '\t') {
-            return 0;
+    regex_t re;
+
+    if (regcomp(&re, "^:[0-9A-Za-z]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+        if (regexec(&re, ch, 0, NULL, 0) == 0) {
+            regfree(&re);
+            return 1;
         }
     }
+    regfree(&re);
 
-    return 1;
+    return 0;
+}
+
+char* trim(char* word) {
+    if (word == NULL) {
+        perror("invalid entry");
+        return NULL;
+    }
+    char* res = word;
+    char* src = word;
+    while (*src) {
+        if (!isspace(*src)) {
+            *res++ = *src;
+        }
+        src++;
+    }
+
+    *res = '\0';
+
+    return word;
 }
 
 char* cleanFile(char* file) {
@@ -104,6 +128,7 @@ char* cleanFile(char* file) {
             continue;
         } else if (line[0] == ':') {
             if (checkLabel(line)) {
+                trim(line);
                 strcat(cleaned, line);
             } else {
                 perror("Invalid label line!");
