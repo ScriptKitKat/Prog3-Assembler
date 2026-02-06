@@ -167,7 +167,7 @@ int deciVerify64(char* c) {
 
     for (int i = 0; c[i] != '\0'; i++) {
         if (c[i] - '0' >= 0 && c[i] - '0' <= 9) {
-            if (num > (pow(2, 64) - 1) / 10) {
+            if (num > (pow(2, 64) - 1)) {
                 perror("Num out of range!");
                 return 0;
             } else {
