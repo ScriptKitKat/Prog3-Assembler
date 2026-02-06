@@ -4,7 +4,7 @@
 	subi r31, 8
 	addi r0, 4095
 	mov (r1)(-33), r4
-	mov r0, (r1)(2047)
+	mov r0, (r1)(-2048)
 	mov r0, 177
 	mov r0, (r31)(0)
 	addi r31, 8

@@ -304,23 +304,23 @@ int deciVerify(char* c, int flag) {
         return 0;
     }
 
-    unsigned long long num = 0;
+    long num = 0;
 
     for (int i = (c[0] == '-') ? 1 : 0; c[i] != '\0'; i++) {
         if ((c[i] >= '0' && c[i] <= '9')) {
             int digit = c[i] - '0';
+            num = (digit) + num*10;
 
             if (flag) {
                 if (c[0] == '-' && num > 2048) {
                     return 0;
-                } else if (num > 2047) {
+                } else if (c[0] != '-' && num > 2047) {
                     return 0;
                 }
             } else if (!flag && num > 4095) {
                 return 0;
             }
             
-            num = (digit) + num*10;
         }
     }
 
