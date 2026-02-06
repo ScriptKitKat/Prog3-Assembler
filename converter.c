@@ -145,10 +145,6 @@ void writeBinary(char* file, char* filepath) {
 
             uint32_t res = getBinaryInstruction(values, count);
 
-            if (res == NULL) {
-                free(fileCopy);
-                return NULL;
-            }
             for (int i = 0; i < count; i++) {
                 free(values[i]);
             }
@@ -360,8 +356,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     }
 
     // rd, rd
-    if ((strcmp(opcode, "brnz") == 0)
-        || (strcmp(opcode, "not") == 0)) {
+    if (((strcmp(opcode, "brnz") == 0)
+        || (strcmp(opcode, "not") == 0)) && count == 3) {
             for (int i = 1; i < count; i++) {
                 if (!verifyRegister(values[i])) {
                     perror("invalid register in instruction line!");
@@ -409,12 +405,12 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
                 perror("invalid register in instruction line!");
                 return NULL;
             }
-        } else (
+        } else {
             if (!deciVerify(values[1], 1)) {
                 perror("invalid decimal value in instruction line!");
                 return NULL;
             }
-        )
+        }
 
         sprintf(result, "%s\n", line);
         return result;
@@ -433,7 +429,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
 
     // seperate macro case
     if (strcmp(opcode, "mov") == 0 && count == 4) {
-        if (strncmp(line, "\tmov (", 6) == 0 && count == 4) {
+        if (strncmp(line, "\tmov (", 6) == 0) {
             if (verifyRegister(values[1]) && deciVerify(values[2], 1) && verifyRegister(values[3])) {
                 sprintf(result, "%s\n", line);
                 return result;
@@ -476,8 +472,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
             return NULL;
         }
     }
-    if (strcmp(opcode, "ld") == 0) {
-        if (verifyRegister(values[1]) && count == 1) {
+    if (strcmp(opcode, "ld") == 0 && count == 3) {
+        if (verifyRegister(values[1])) {
             return expandLD(values[1], values[2], instructionLabel, instructionAddress, labelCount);
         } else {
             perror("invalid ld!");
@@ -601,14 +597,6 @@ char* expandMacros(char* file, char instructionLabel[][256], unsigned int* instr
 
     free(fileCopy);
     return result;
-}
-
-
-int macroSize(char* line) {
-    if (strncmp(line, "\tld", 3) == 0) return 12;
-    if (strncmp(line, "\tpush", 5) == 0) return 2;
-    if (strncmp(line, "\tpop", 4) == 0) return 2;
-    return 1;
 }
 
 void writeToFile(char* toWrite, char* name) {

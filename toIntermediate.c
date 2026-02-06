@@ -5,6 +5,14 @@
 #include <stdint.h>
 #include "toIntermediate.h"
 
+
+int macroSize(char* line) {
+    if (strncmp(line, "\tld", 3) == 0) return 12;
+    if (strncmp(line, "\tpush", 5) == 0) return 2;
+    if (strncmp(line, "\tpop", 4) == 0) return 2;
+    return 1;
+}
+
 char* handleTabs(char* line) {
     char* src = malloc(sizeof(char) * strlen(line) * 2);
     int inOpcode = 0;
