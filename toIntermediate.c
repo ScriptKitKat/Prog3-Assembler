@@ -107,12 +107,12 @@ char* cleanFile(char* file) {
     while ((read = getline(&line, &len, f)) != -1) {
         if (line[0] == '.') {
             if (strcmp(line, mode) != 0 || strlen(cleaned) == 0) {
-                printf("yes2\n");
                 if (strcmp(line, ".code\n") == 0) {
-                    printf("yes2\n");
+                    code = 1;
                     strcat(cleaned, ".code\n");
                     mode = ".code\n";
                 } else if (strcmp(line, ".data\n") == 0) {
+                    code = 1;
                     strcat(cleaned, ".data\n");
                     mode = ".data\n";
                 } else {
