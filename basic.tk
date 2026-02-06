@@ -4,7 +4,7 @@
 	addi r0,4095
 	mov (r1)(-33), r4
 	mov r0,(r1)(2047)
-	mov r0, 12
+	mov r0, 177
 	pop r0
 	in r0,r1
 	brr r31

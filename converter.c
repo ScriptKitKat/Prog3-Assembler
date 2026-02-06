@@ -166,12 +166,12 @@ int deciVerify64(char* c) {
     long num = 0;
 
     for (int i = 0; c[i] != '\0'; i++) {
-        if (c[i] - '0' >= 0 || c[i] - '0' <= 9) {
+        if (c[i] - '0' >= 0 && c[i] - '0' <= 9) {
             if (num > (pow(2, 64) - 1) / 10) {
                 perror("Num out of range!");
                 return 0;
             } else {
-                num = c[i] + num*10;
+                num = (c[i] - '0') + num*10;
             }
             continue;
         } else {
@@ -220,7 +220,6 @@ char* expandLD(char* rd, char* value, char instructionLabel[][256], unsigned int
     char tmp[64];
     for (int shift = 52; shift >= 4; shift -= 12) {
         sprintf(tmp, "\taddi %s, %lu\n", rd, (val >> shift &0xFFF));
-        // 52, 40, 28, 16, 4
         strcat(result, tmp);
         if (shift > 4) {
             sprintf(tmp, "\tshftli %s, 12\n", rd);
