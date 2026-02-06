@@ -20,6 +20,7 @@
 	mov   (r4)(-8) ,   r6
 	pop r0
 	in r0,r1
+	brr 2047
 	brr r31
 	brr 920
 	ld r0, 184467440737095

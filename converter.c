@@ -55,10 +55,11 @@ uint32_t getBinaryInstruction(char** values, int count) {
     if (strcmp(values[0], "brr") == 0) {
         char* toConvert = values[1];
         int len = 12;
+
         if (toConvert[0] == 'r') {
             instructionLine |= (0x9 << shift);
         } else {
-            instructionLine |= (0x10 << shift);
+            instructionLine |= (0xa << shift);
         }
     } else if (strcmp(values[0], "mov") == 0) {
         if (count == 3) {
@@ -177,7 +178,7 @@ int deciVerify64(char* c) {
                 return 0;
             } else {
                 num = (digit) + num*10;
-                // printf("num: %lld\n", num);
+                
             }
             continue;
         } else {
@@ -639,7 +640,6 @@ int main(int argc, char* argv[]) {
 
     if (regcomp(&re, "^\\s*mov r[0-9]+,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, "\tmov r1, r2", 0, NULL, 0) == 0) {
-            printf("matchy!");
             regfree(&re);
         }
     }
