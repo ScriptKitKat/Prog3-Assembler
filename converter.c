@@ -270,25 +270,23 @@ int verifyRegister(char* c) {
         return 0;
     }
 
-    int first = 0;
     if (c[0] == 'r') {
-        first++;
-    }
-    for (int i = 1; c[i] != '\0'; i++) {
-        if (!(c[i] - '0' >= 0 && c[i] - '0' < 10)) {
-            first--;
-        } else {
-            first++;
+        for (int i = 1; c[i] != '\0'; i++) {
+            if (!(c[i] - '0' >= 0 && c[i] - '0' < 10)) {
+                perror("invalid register!\n");
+                return 0; 
+            }
         }
+        int n = atoi(c + 1);
+    
+        if (n < 0 || n > 31) {
+            perror("invalid register!\n");
+            return 0;
+        }
+        return 1;
     }
-    int n = atoi(c + 1);
 
-    if (n < 0 || n > 31) {
-        perror("invalid register!\n");
-        return 0;
-    }
-
-    return first > 1;
+    return 0;
 }
 
 int deciVerify(char* c, int flag) {
@@ -401,7 +399,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
 
     // L
     if (strcmp(opcode, "brr") == 0 && count == 2) {
-        if (strncmp(line, "brr r", 5) == 0) {
+        if (strncmp(line, "\tbrr r", 5) == 0) {
             if (!verifyRegister(values[1])) {
                 perror("invalid register in instruction line!");
                 return NULL;
@@ -529,7 +527,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         }
     }
 
-    // printf("line: %s\n", line);
+    printf("line: %s\n", line);
     perror("non-existent instruction!");
     return NULL;
 }
