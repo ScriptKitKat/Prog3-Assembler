@@ -329,7 +329,6 @@ int deciVerify(char* c, int flag) {
                 return 0;
             } 
         } else {
-            perror("not a number!\n");
             return 0;
         }
     }
@@ -341,7 +340,7 @@ int movCase(char* line) {
     regex_t re;
 
     // mov r1, (r2)(L)
-    if (regcomp(&re, "^\\s*mov r[0-9]+\\s*,\\s*\\(r[0-9]+\\)\\(-?[0-9]+\\)\\s*$$", REG_EXTENDED | REG_NOSUB) == 0) {
+    if (regcomp(&re, "^\\s*mov r[0-9]+\\s*,\\s*\\(r[0-9]+\\)\\(-?:?[0-9]+\\)\\s*$$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, line, 0, NULL, 0) == 0) {
             regfree(&re);
             return 1;
@@ -349,7 +348,7 @@ int movCase(char* line) {
     }
     regfree(&re);
 
-    if (regcomp(&re, "^\\s*mov \\(r[0-9]+\\)\\(-?[0-9]+\\)\\s*,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+    if (regcomp(&re, "^\\s*mov \\(r[0-9]+\\)\\(-?:?[0-9]+\\)\\s*,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, line, 0, NULL, 0) == 0) {
             regfree(&re);
             return 2;
@@ -365,7 +364,7 @@ int movCase(char* line) {
     }
     regfree(&re);
     
-    if (regcomp(&re, "^\\s*mov r[0-9]+, [0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+    if (regcomp(&re, "^\\s*mov r[0-9]+, :?[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, line, 0, NULL, 0) == 0) {
             regfree(&re);
             return 4;
@@ -431,20 +430,26 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         || (strcmp(opcode, "shftri") == 0)
         || (strcmp(opcode, "shftli") == 0))
         && count == 3) {
+            if (!verifyRegister(values[1]) || (!deciVerify(values[2], 0) && values[2][0] != ':')) {
+                perror("invalid register or decimal value in instruction line!");
+                return NULL;
+            }
 
-            if (values[2] == ':') {
+            if (deciVerify(values[2], 0)) {
+                sprintf(result, "%s\n", line);
+                return result;
+            }
+
+            if (values[2][0] == ':') {
                 uint64_t val = getAddress(values[2], instructionLabel, instructionAddress, labelCount);
                 if (val == 0) {
                     perror("invalid label address!");
                     return NULL;
                 }
+
+                sprintf(result, "\t%s %s, %lu\n", values[0], values[1], val);
+                return result;
             }
-            if (!verifyRegister(values[1]) || !deciVerify(values[2], 0)) {
-                perror("invalid register or decimal value in instruction line!");
-                return NULL;
-            }
-            sprintf(result, "%s\n", line);
-            return result;
     }
 
     // rd
@@ -467,9 +472,20 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
                 return NULL;
             }
         } else {
-            if (!deciVerify(values[1], 1)) {
+            if (!deciVerify(values[1], 1) && values[1][0] != ':') {
                 perror("invalid decimal value in instruction line!");
                 return NULL;
+            }
+
+            if (values[1][0] == ':') {
+                uint64_t val = getAddress(values[1], instructionLabel, instructionAddress, labelCount);
+                if (val == 0) {
+                    perror("invalid label address!");
+                    return NULL;
+                }
+
+                sprintf(result, "\t%s %lu\n", values[0], val);
+                return result;
             }
         }
 
@@ -495,7 +511,17 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
             if (caseMov == 3 && verifyRegister(values[1]) && verifyRegister(values[2])) {
                 return result;
             }
-            if (caseMov == 4 && verifyRegister(values[1]) &&  deciVerify(values[2], 0)) {
+            if (caseMov == 4 && verifyRegister(values[1]) && deciVerify(values[2], 0)) {
+                return result;
+            }
+
+            if (caseMov == 4 && verifyRegister(values[1]) && values[2][0] == ':') {
+                uint64_t val = getAddress(values[2], instructionLabel, instructionAddress, labelCount);
+                if (val == 0) {
+                    perror("invalid label address!");
+                    return NULL;
+                }
+                sprintf(result, "\t%s %s, %lu\n", values[0], values[1], val);
                 return result;
             }
         }
@@ -503,7 +529,28 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
             if (caseMov == 2 && verifyRegister(values[1]) && deciVerify(values[2], 1) && verifyRegister(values[3])) {
                 return result;
             }
+
+            if (caseMov == 2 && verifyRegister(values[1]) && values[2][0] == ':') {
+                uint64_t val = getAddress(values[2], instructionLabel, instructionAddress, labelCount);
+                if (val == 0) {
+                    perror("invalid label address!");
+                    return NULL;
+                }
+                sprintf(result, "\t%s (%s)(%lu), %s\n", values[0], values[1], val, values[3]);
+                return result;
+            }
+
             if (caseMov == 1 && verifyRegister(values[1]) && verifyRegister(values[2]) && deciVerify(values[3], 1)) {
+                return result;
+            }
+
+            if (caseMov == 1 && verifyRegister(values[1]) && verifyRegister(values[2]) && values[3][0] == ':') {
+                uint64_t val = getAddress(values[3], instructionLabel, instructionAddress, labelCount);
+                if (val == 0) {
+                    perror("invalid label address!");
+                    return NULL;
+                }
+                sprintf(result, "\t%s %s, (%s)(%lu)\n", values[0], values[1], values[2], val);
                 return result;
             }
         }
