@@ -248,7 +248,7 @@ char* expandPop(char* rd) {
     result[0] = '\0';
 
     char tmp[64];
-    sprintf(tmp, "\tmov %s, (r31)(-8)\n", rd);
+    sprintf(tmp, "\tmov %s, (r31)(0)\n", rd);
     strcat(result, tmp);
     strcat(result, "\taddi r31, 8\n");
     return result;
@@ -450,7 +450,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         }
     }
 
-    if (strcmp(opcode, "in") == 0 || strcmp(opcode, "out") == 0) {
+    if ((strcmp(opcode, "in") == 0 || strcmp(opcode, "out") == 0) && count == 3) {
         if (verifyRegister(values[1]) && (verifyRegister(values[2]))) {
             char* result = malloc(256);
             if (strcmp(opcode, "out") == 0) {
