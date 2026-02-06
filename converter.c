@@ -613,7 +613,6 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         }
     }
 
-    printf("line: %s\n", line);
     perror("non-existent instruction!");
     return NULL;
 }
@@ -646,16 +645,20 @@ char* expandMacros(char* file, char instructionLabel[][256], unsigned int* instr
             while (part != NULL) {
                 values[count] = strdup(part);
                 count++;
+                if (count > 4) {
+                    return NULL;
+                }
                 part = strtok_r(NULL, "\t, ()", &macroptr);
             }
 
             char* res = getMacroLine(token, values, count, instructionLabel, instructionAddress, labelCount);
 
-            if (res == NULL) {
+            if (res == NULL || strlen(res) == 0) {
                 free(fileCopy);
                 free(result);
                 return NULL;
             }
+
             for (int i = 0; i < count; i++) {
                 free(values[i]);
             }            
