@@ -149,16 +149,17 @@ int findAddress(char* file, char instructionLabel[][256], unsigned int* instruct
             if (strlen(line) != 0) {
                 if (line[0] == '\t') {
                     current += macroSize(line) * 4;
-                } else if (line[0] == ':') {
-                    strcpy(instructionLabel[labelNum], line);
-                    instructionAddress[labelNum] = current;
-                    labelNum++;
                 }
             }
         } else if (strcmp(mode, ".data") == 0) {
             if (line[0] == '\t') {
                 current += 8;
             }
+        }
+        if (line[0] == ':') {
+            strcpy(instructionLabel[labelNum], line);
+            instructionAddress[labelNum] = current;
+            labelNum++;
         }
         line = strtok(NULL, "\n");
     }
