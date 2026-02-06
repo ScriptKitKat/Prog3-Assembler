@@ -265,8 +265,8 @@ char* expandClr(char* rd) {
 }
 
 int verifyRegister(char* c) {
-    if (strlen(c) == 0) {
-        perror("invalid length register!\n");
+    if (strlen(c) == 0 || c == NULL) {
+        perror("invalid register!\n");
         return 0;
     }
 
@@ -304,7 +304,7 @@ int deciVerify(char* c, int flag) {
         return 0;
     }
 
-    long num = 0;
+    unsigned long long num = 0;
 
     for (int i = (c[0] == '-') ? 1 : 0; c[i] != '\0'; i++) {
         if ((c[i] >= '0' && c[i] <= '9')) {
@@ -319,8 +319,10 @@ int deciVerify(char* c, int flag) {
                 }
             } else if (!flag && num > 4095) {
                 return 0;
-            }
-            
+            } 
+        } else {
+            perror("not a number!\n");
+            return 0;
         }
     }
 
@@ -433,22 +435,21 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
 
     // seperate macro case
     if (strcmp(opcode, "mov") == 0) {
-        if (count == 4) {
-            if (verifyRegister(values[1]) && deciVerify(values[2], 1) && verifyRegister(values[3])) {
-                sprintf(result, "%s\n", line);
+        sprintf(result, "%s\n", line);
+        if (count == 3) {
+            if (verifyRegister(values[1]) && verifyRegister(values[2])) {
                 return result;
-            }else if (verifyRegister(values[1]) && verifyRegister(values[2]) && deciVerify(values[3], 1)) {
-                sprintf(result, "%s\n", line);
+            }
+            if (verifyRegister(values[1]) &&  deciVerify(values[2], 0)) {
                 return result;
             }
         }
-        if (count == 3) {
-            if (verifyRegister(values[1]) && (verifyRegister(values[2]) || deciVerify(values[2], 0))) {
-                sprintf(result, "%s\n", line);
+
+        if (count == 4) {
+            if (verifyRegister(values[1]) && deciVerify(values[2], 1) && verifyRegister(values[3])) {
                 return result;
-            } else {
-                perror("Mov arguments invalid");
-                return NULL;
+            }else if (verifyRegister(values[1]) && verifyRegister(values[2]) && deciVerify(values[3], 1)) {
+                return result;
             }
         }
     }
