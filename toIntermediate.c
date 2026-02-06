@@ -46,7 +46,7 @@ char* handleTabs(char* line) {
 int checkLabel(char* ch) {
     regex_t re;
 
-    if (regcomp(&re, "^:[0-9A-Za-z]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+    if (regcomp(&re, "^:[0-9A-Za-z_-]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, ch, 0, NULL, 0) == 0) {
             regfree(&re);
             return 1;
@@ -129,6 +129,7 @@ char* cleanFile(char* file) {
         } else if (line[0] == ':') {
             if (checkLabel(line)) {
                 trim(line);
+                strcat(line, "\n");
                 strcat(cleaned, line);
             } else {
                 perror("Invalid label line!");
@@ -154,7 +155,7 @@ char* cleanFile(char* file) {
 }
 
 int findAddress(char* file, char instructionLabel[][256], unsigned int* instructionAddress) {
-    char* fileCopy = strdup(file);  
+    char* fileCopy = strdup(file);
     char* line = strtok(fileCopy, "\n");
     int labelNum = 0;
     unsigned int current = 0x1000;

@@ -1,7 +1,15 @@
 .code
-	brr :90
-	addi r0,:90
-	mov r1, :90
-	mov r1, (r2)(:90)
-	mov r1, (r)(-100)) mov r2, (r45)(100)
-:90
+	ld r5, :target
+	br r5
+:target
+	halt
+; brnz (branch if not zero)
+	ld r1, :loop_start
+	brnz r1, r2
+:loop_start
+	add r0, r0, r1
+; brgt (branch if greater than)
+	ld r3, :end_label
+	brgt r3, r5, r6
+:end_label
+	halt

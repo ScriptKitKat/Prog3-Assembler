@@ -1,6 +1,43 @@
 .code
-	brr 4116
-	addi r0, 4116
-	mov r1, 4116
-	mov r1, (r2)(4116)
-	mov (r2)(4116), r1
+	xor r5, r5, r5
+	addi r5, 0
+	shftli r5, 12
+	addi r5, 0
+	shftli r5, 12
+	addi r5, 0
+	shftli r5, 12
+	addi r5, 0
+	shftli r5, 12
+	addi r5, 259
+	shftli r5, 4
+	addi r5, 4
+	br r5
+	priv r0, r0, r0, 0
+	xor r1, r1, r1
+	addi r1, 0
+	shftli r1, 12
+	addi r1, 0
+	shftli r1, 12
+	addi r1, 0
+	shftli r1, 12
+	addi r1, 0
+	shftli r1, 12
+	addi r1, 262
+	shftli r1, 4
+	addi r1, 12
+	brnz r1, r2
+	add r0, r0, r1
+	xor r3, r3, r3
+	addi r3, 0
+	shftli r3, 12
+	addi r3, 0
+	shftli r3, 12
+	addi r3, 0
+	shftli r3, 12
+	addi r3, 0
+	shftli r3, 12
+	addi r3, 266
+	shftli r3, 4
+	addi r3, 4
+	brgt r3, r5, r6
+	priv r0, r0, r0, 0
