@@ -596,17 +596,21 @@ char* expandMacros(char* file, char instructionLabel[][256], unsigned int* instr
                 free(values[i]);
             }            
             strcat(result, res);
-        } else if (strcmp(mode, ".data") == 0 && strlen(token) > 0 && token[0] == '\t') {
-            char* num = token + 1;
-            if (!deciVerify64(num)) {
-                free(fileCopy);
-                free(result);
-                return NULL;
-            }
         } else {
             if (token[0] != ':') {
-                strcat(result, token);
-                strcat(result, "\n");
+                if (strcmp(mode, ".data") == 0 && strlen(token) > 0 && token[0] == '\t') {
+                    char* num = token + 1;
+                    if (!deciVerify64(num)) {
+                        free(fileCopy);
+                        free(result);
+                        return NULL;
+                    }
+                    strcat(result, token);
+                    strcat(result, "\n");
+                } else {
+                    strcat(result, token);
+                    strcat(result, "\n");
+                }
             }
         }
 
