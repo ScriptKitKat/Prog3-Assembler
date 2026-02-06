@@ -134,7 +134,7 @@ void writeBinary(char* file, char* filepath) {
                 mode = ".data";
             }
         }
-        if (strlen(token) > 0 && token[0] == '\t') {
+        if (strlen(token) > 0 && token[0] == '\t' && strcmp(mode, ".code") == 0) {
             char *macroptr;
             char* dup = strdup(token);
             char* part = strtok_r(dup, "\t, ()", &macroptr);
@@ -153,6 +153,12 @@ void writeBinary(char* file, char* filepath) {
             }
 
             fwrite(&res, sizeof(uint32_t), 1, fptr);
+        }
+
+        if (strlen(token) > 0 && token[0] == '\t' && strcmp(mode, ".data") == 0) {
+            uint64_t res = atoi(token + 1);
+
+            fwrite(&res, sizeof(uint64_t), 1, fptr);
         }
         token = strtok_r(NULL, "\n", &lineptr);
         first = 1;
