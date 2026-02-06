@@ -79,10 +79,12 @@ char* cleanFile(char* file) {
     size_t len = 0;
     int read;
     char* mode = ".code\n";
+    int code = 0;
     while ((read = getline(&line, &len, f)) != -1) {
         if (line[0] == '.') {
             if (strcmp(line, mode) != 0 || strlen(cleaned) == 0) {
                 if (strcmp(line, ".code\n") == 0) {
+                    code = 1;
                     strcat(cleaned, ".code\n");
                     mode = ".code\n";
                 } else if (strcmp(line, ".data\n") == 0) {
@@ -117,7 +119,13 @@ char* cleanFile(char* file) {
     free(line);
     fclose(f);
 
-    return cleaned;
+    if (code == 1) {
+        return cleaned;
+    } else {
+        perror("No .code!");
+        free(cleaned);
+        return NULL;
+    }
 }
 
 int findAddress(char* file, char instructionLabel[][256], unsigned int* instructionAddress) {
