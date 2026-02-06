@@ -134,7 +134,7 @@ void writeBinary(char* file, char* filepath) {
                 mode = ".data";
             }
         }
-        if (strlen(token) > 0 && token[0] == '\t' && strcmp(mode, ".code") == 0) {
+        if (strlen(token) > 0 && token[0] == '\t') {
             char *macroptr;
             char* dup = strdup(token);
             char* part = strtok_r(dup, "\t, ()", &macroptr);
@@ -153,7 +153,7 @@ void writeBinary(char* file, char* filepath) {
             }
 
             fwrite(&res, sizeof(uint32_t), 1, fptr);
-        } 
+        }
         token = strtok_r(NULL, "\n", &lineptr);
         first = 1;
     }
@@ -425,6 +425,14 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         || (strcmp(opcode, "shftri") == 0)
         || (strcmp(opcode, "shftli") == 0))
         && count == 3) {
+
+            if (values[2] == ':') {
+                uint64_t val = getAddress(values[2], instructionLabel, instructionAddress, labelCount);
+                if (val == 0) {
+                    perror("invalid label address!");
+                    return NULL;
+                }
+            }
             if (!verifyRegister(values[1]) || !deciVerify(values[2], 0)) {
                 perror("invalid register or decimal value in instruction line!");
                 return NULL;
