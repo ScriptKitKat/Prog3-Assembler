@@ -1,3 +1,4 @@
+.code
 	xor r5, r5, r5
 	addi r5, 0
 	shftli r5, 12

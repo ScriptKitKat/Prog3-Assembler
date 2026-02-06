@@ -122,7 +122,8 @@ char* cleanFile(char* file) {
                     return NULL;
                 }
             }
-            if (strcmp(line, ".code\n") == 0) {
+            if (strcmp(line, ".code\n") == 0 && code == 0) {
+                strcat(cleaned, ".code\n");
                 code = 1;
             }
         } else if (line[0] == '\t') {
