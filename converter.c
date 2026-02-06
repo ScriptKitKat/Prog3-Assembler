@@ -176,7 +176,7 @@ int deciVerify64(char* c) {
                 return 0;
             } else {
                 num = (digit) + num*10;
-                printf("num: %lld\n", num);
+                // printf("num: %lld\n", num);
             }
             continue;
         } else {
