@@ -529,7 +529,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         }
     }
 
-    printf("line: %s\n", line);
+    // printf("line: %s\n", line);
     perror("non-existent instruction!");
     return NULL;
 }
