@@ -23,7 +23,7 @@ char* handleTabs(char* line) {
     for (int i = 1; line[i] != '\0'; i++) {
         if (line[i] != ' ' && line[i] != '\t') {
             src[index++] = line[i];
-            if (line[i] == ',') {
+            if (line[i] == ',' || (line[i] == ')' && line[i + 1] == '(')) {
                 gotSpace = 0;
             }
             if (inOpcode == 0) {

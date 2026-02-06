@@ -3,14 +3,14 @@
 	mov (r31)(-8), r0
 	subi r31, 8
 	addi r0, 4095
-	mov r0, (r1)(-2048)
-	mov r0, (r1)(2047)
-	mov r0, (r31)(-8)
+	mov r0, (r1) (-2048)
+	mov r0, (r1) (2047)
+	mov r0, (r31)(0)
 	addi r31, 8
 	priv r0, r1, r0, 3
 	brr r31
 	brr 920
-	priv r1 ,r0, r0, 4
+	priv r1, r0, r0, 4
 	xor r0, r0, r0
 	addi r0, 0
 	shftli r0, 12

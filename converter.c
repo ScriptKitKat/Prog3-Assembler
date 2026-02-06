@@ -238,7 +238,7 @@ char* expandPush(char* rd) {
     char* result = malloc(512);
     result[0] = '\0';
 
-    sprintf(result, "\tmov (r31)(-8), %s\n", rd);
+    sprintf(result, "\tmov (r31) (-8), %s\n", rd);
     strcat(result, "\tsubi r31, 8\n");
     return result;
 }
@@ -248,7 +248,7 @@ char* expandPop(char* rd) {
     result[0] = '\0';
 
     char tmp[64];
-    sprintf(tmp, "\tmov %s, (r31)(0)\n", rd);
+    sprintf(tmp, "\tmov %s, (r31) (0)\n", rd);
     strcat(result, tmp);
     strcat(result, "\taddi r31, 8\n");
     return result;
@@ -454,7 +454,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         if (verifyRegister(values[1]) && (verifyRegister(values[2]))) {
             char* result = malloc(256);
             if (strcmp(opcode, "out") == 0) {
-                sprintf(result, "\tpriv %s ,%s, r0, 4\n", values[1], values[2]);
+                sprintf(result, "\tpriv %s, %s, r0, 4\n", values[1], values[2]);
             } else {
                 sprintf(result, "\tpriv %s, %s, r0, 3\n", values[1], values[2]);
             }
@@ -482,7 +482,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     }
     if (strcmp(opcode, "halt") == 0) {
         if (count == 1) {
-            return "\tpriv r0,r0,r0,0\n";
+            return "\tpriv r0, r0, r0, 0\n";
         } else {
             perror("invalid halt!");
             return NULL;
@@ -491,14 +491,15 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
 
     /*
     brr l
+
+    invalid tko/int:
     brr r
     mov mr
-    
+    mov_rl
     mov rm
-
     move rr
 
-    mul
+    mulf
     not
     brnz
     brr l
@@ -511,17 +512,6 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     mov rr
 
     not
-
-
-    === TEST single macro ===
-    halt (invalid)
-
-    out
-
-    pop (failed)
-
-
-    
     */
     if (strcmp(opcode, "push") == 0) {
         if (verifyRegister(values[1])) {
