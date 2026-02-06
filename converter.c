@@ -210,7 +210,7 @@ char* expandLD(char* rd, char* value, char instructionLabel[][256], unsigned int
     } else if (deciVerify64(value)) { // // check this todo
         val = strtoull(value, NULL, 0);
     } else {
-        perror("Invalid address for ld!!");
+        perror("Invalid ld!!");
         return NULL;
     }
 

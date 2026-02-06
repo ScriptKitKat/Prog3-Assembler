@@ -11,18 +11,18 @@
 	priv r0, r1, r0, 3
 	brr r31
 	brr 920
-	xor r1, r1, r1
-	addi r1, 4095
-	shftli r1, 12
-	addi r1, 4095
-	shftli r1, 12
-	addi r1, 4095
-	shftli r1, 12
-	addi r1, 4095
-	shftli r1, 12
-	addi r1, 4095
-	shftli r1, 4
-	addi r1, 15
+	xor r0, r0, r0
+	addi r0, 0
+	shftli r0, 12
+	addi r0, 0
+	shftli r0, 12
+	addi r0, 0
+	shftli r0, 12
+	addi r0, 0
+	shftli r0, 12
+	addi r0, 1262
+	shftli r0, 4
+	addi r0, 10
 	priv r1, r0, r0, 4
 	xor r0, r0, r0
 	addi r0, 0
