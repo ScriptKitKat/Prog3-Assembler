@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "toIntermediate.h"
 
+
 typedef struct {
     const char* name;
     unsigned int opcode;
@@ -160,18 +161,22 @@ void writeBinary(char* file, char* filepath) {
 }
 
 int deciVerify64(char* c) {
-    if (c[0] == '-') {
+    if (c[0] == '-' || c == NULL) {
+        perror("invalid L value!");
         return 0;
     }
-    long num = 0;
+    unsigned long long num = 0;
 
     for (int i = 0; c[i] != '\0'; i++) {
-        if (c[i] - '0' >= 0 && c[i] - '0' <= 9) {
-            if (num > (pow(2, 64) - 1) / 10) {
+        if (c[i] >= '0' && c[i] <= '9') {
+            int digit = c[i] - '0';
+
+            if (num > (UINT64_MAX - digit) / 10) {
                 perror("Num out of range!");
                 return 0;
             } else {
-                num = (c[i] - '0') + num*10;
+                num = (digit) + num*10;
+                printf("num: %lld\n", num);
             }
             continue;
         } else {
