@@ -598,6 +598,13 @@ char* expandMacros(char* file, char instructionLabel[][256], unsigned int* instr
                 free(values[i]);
             }            
             strcat(result, res);
+        } else if (strcmp(mode, ".data") == 0 && strlen(token) > 0 && token[0] == '\t') {
+            char* num = token + 1;
+            if (!deciVerify64(num)) {
+                free(fileCopy);
+                free(result);
+                return NULL;
+            }
         } else {
             if (token[0] != ':') {
                 strcat(result, token);
@@ -635,14 +642,13 @@ int main(int argc, char* argv[]) {
     }
 
     char* cleanedFile = cleanFile(argv[1]);
+    // regex_t re;
 
-    regex_t re;
-
-    if (regcomp(&re, "^\\s*mov r[0-9]+,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
-        if (regexec(&re, "\tmov r1, r2", 0, NULL, 0) == 0) {
-            regfree(&re);
-        }
-    }
+    // if (regcomp(&re, "^\\s*mov r[0-9]+,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+    //     if (regexec(&re, "\tmov r1, r2", 0, NULL, 0) == 0) {
+    //         regfree(&re);
+    //     }
+    // }
 
     if (cleanedFile == NULL) {
         perror("Invalid!\n");

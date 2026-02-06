@@ -5,31 +5,5 @@
 	mov r1, (r2)(0)
 	mov r0, (r3)(-1)
 	mov r15, (r8)(16)
-	mov r4, (r7)(-2048)
-	mov   r1 ,   (r2)(5)
-	mov r1, r2
-	mov r0, r0
-	mov r7, r15
-	mov   r3 ,   r4
-	mov r1, 0
-	mov r7, 2047
-	mov   r5 ,   16
-	mov (r1)(0), r2
-	mov (r3)(-4), r7
-	mov (r15)(16), r0
-	mov   (r4)(-8) ,   r6
-	pop r0
-	in r0,r1
-	brr 2047
-	brr r31
-	brr 920
-	ld r0, 184467440737095
-.code
-	out r1,r0
-	ld r0,      :L0
 .data
-	322834289
-.code
-:L0
-.code
-	brr 128
+	-322834289
