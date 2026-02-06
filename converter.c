@@ -426,25 +426,24 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     }
 
     // seperate macro case
-    if (strcmp(opcode, "mov") == 0 && count == 4) {
-        if (strncmp(line, "\tmov (", 6) == 0) {
+    if (strcmp(opcode, "mov") == 0) {
+        if (count == 4) {
             if (verifyRegister(values[1]) && deciVerify(values[2], 1) && verifyRegister(values[3])) {
                 sprintf(result, "%s\n", line);
                 return result;
-            }
-        } else {
-            if (verifyRegister(values[1]) && verifyRegister(values[2]) && deciVerify(values[3], 1)) {
+            }else if (verifyRegister(values[1]) && verifyRegister(values[2]) && deciVerify(values[3], 1)) {
                 sprintf(result, "%s\n", line);
                 return result;
             }
         }
-    } else if (strcmp(opcode, "mov") == 0 && count == 3) {
-        if (verifyRegister(values[1]) && (verifyRegister(values[2]) || deciVerify(values[2], 0))) {
-            sprintf(result, "%s\n", line);
-            return result;
-        } else {
-            perror("Mov arguments invalid");
-            return NULL;
+        if (count == 3) {
+            if (verifyRegister(values[1]) && (verifyRegister(values[2]) || deciVerify(values[2], 0))) {
+                sprintf(result, "%s\n", line);
+                return result;
+            } else {
+                perror("Mov arguments invalid");
+                return NULL;
+            }
         }
     }
 
