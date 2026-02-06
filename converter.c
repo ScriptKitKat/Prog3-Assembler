@@ -399,7 +399,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
 
     // L
     if (strcmp(opcode, "brr") == 0 && count == 2) {
-        if (strncmp(line, "\tbrr r", 5) == 0) {
+        if (strncmp(line, "\tbrr r", 6) == 0) {
             if (!verifyRegister(values[1])) {
                 perror("invalid register in instruction line!");
                 return NULL;

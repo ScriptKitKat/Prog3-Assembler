@@ -5,7 +5,7 @@
 	addi r0, 4095
 	mov (r1)(-33), r4
 	mov r0, (r1)(2047)
-	mov r0, -12
+	mov r0, 12
 	mov r0, (r31)(0)
 	addi r31, 8
 	priv r0, r1, r0, 3
