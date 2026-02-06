@@ -403,11 +403,19 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
     }
 
     // L
-    if (strcmp(opcode, "brr") == 0) {
-        if (!deciVerify(values[1], 1)) {
-            perror("invalid decimal value in instruction line!");
-            return NULL;
-        }
+    if (strcmp(opcode, "brr") == 0 && count == 2) {
+        if (strncmp(line, "brr r", 5) == 0) {
+            if (!verifyRegister(values[1])) {
+                perror("invalid register in instruction line!");
+                return NULL;
+            }
+        } else (
+            if (!deciVerify(values[1], 1)) {
+                perror("invalid decimal value in instruction line!");
+                return NULL;
+            }
+        )
+
         sprintf(result, "%s\n", line);
         return result;
     }
@@ -454,7 +462,6 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
             } else {
                 sprintf(result, "\tpriv %s, %s, r0, 3\n", values[1], values[2]);
             }
-
             return result;
         } else {
             return NULL;
@@ -465,20 +472,61 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         if (verifyRegister(values[1])) {
             return expandClr(values[1]);
         } else {
-            perror("invalid error!");
+            perror("invalid clr register!");
             return NULL;
         }
     }
     if (strcmp(opcode, "ld") == 0) {
-        if (verifyRegister(values[1])) {
+        if (verifyRegister(values[1]) && count == 1) {
             return expandLD(values[1], values[2], instructionLabel, instructionAddress, labelCount);
+        } else {
+            perror("invalid ld!");
+            return NULL;
         }
     }
     if (strcmp(opcode, "halt") == 0) {
-        return "\tpriv r0,r0,r0,0\n";
+        if (count == 1) {
+            return "\tpriv r0,r0,r0,0\n";
+        } else {
+            perror("invalid halt!");
+            return NULL;
+        }
     }
 
-    // TODO
+    /*
+    brr l
+    brr r
+    mov mr
+    
+    mov rm
+
+    move rr
+
+    mul
+    not
+    brnz
+    brr l
+
+    brr r
+
+    mov mr
+    mov rm
+
+    mov rr
+
+    not
+
+
+    === TEST single macro ===
+    halt (invalid)
+
+    out
+
+    pop (failed)
+
+
+    
+    */
     if (strcmp(opcode, "push") == 0) {
         if (verifyRegister(values[1])) {
             return expandPush(values[1]);
