@@ -340,7 +340,7 @@ int movCase(char* line) {
     regex_t re;
 
     // mov r1, (r2)(L)
-    if (regcomp(&re, "^\\s*mov r[0-9]+\\s*,\\s*\\(r[0-9]+\\)\\(-?:?[0-9]+\\)\\s*$$", REG_EXTENDED | REG_NOSUB) == 0) {
+    if (regcomp(&re, "^\\s*mov r[0-9]+\\s*,\\s*\\(r[0-9]+\\)\\(-?:?[0-9]+\\)\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, line, 0, NULL, 0) == 0) {
             regfree(&re);
             return 1;
