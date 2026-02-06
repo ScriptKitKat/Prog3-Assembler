@@ -333,22 +333,23 @@ int deciVerify(char* c, int flag) {
 int movCase(char* line) {
     regex_t re;
 
-    if (regcomp(&re, "^\\s*mov r\\d+\\s*, \\(r\\d+\\)\\(-?\\d+\\)\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+    // mov r1, (r2)(L)
+    if (regcomp(&re, "^\\s*mov r[0-9]+\\s*,\\s*\\(r[0-9]+\\)\\(-?[0-9]+\\)\\s*$$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, line, 0, NULL, 0) == 0) {
             regfree(&re);
             return 1;
         }
-    } else if (regcomp(&re, "^\\s*mov \\(r\\d+\\)\\(-?\\d+\\)\\s*,\\s*r\\d+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+    } else if (regcomp(&re, "^\\s*mov \\(r[0-9]+\\)\\(-?[0-9]+\\)\\s*,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, line, 0, NULL, 0) == 0) {
             regfree(&re);
             return 2;
         }
-    } else if (regcomp(&re, "^\\s*mov r\\d+,\\s*r\\d+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+    } else if (regcomp(&re, "^\\s*mov r[0-9]+,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, line, 0, NULL, 0) == 0) {
             regfree(&re);
             return 3;
         }
-    } else if (regcomp(&re, "^\\s*mov r\\d+, \\d+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+    } else if (regcomp(&re, "^\\s*mov r[0-9]+, [0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, line, 0, NULL, 0) == 0) {
             regfree(&re);
             return 3;
