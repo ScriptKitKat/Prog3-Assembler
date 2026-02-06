@@ -238,7 +238,7 @@ char* expandPush(char* rd) {
     char* result = malloc(512);
     result[0] = '\0';
 
-    sprintf(result, "\tmov (r31) (-8), %s\n", rd);
+    sprintf(result, "\tmov (r31)(-8), %s\n", rd);
     strcat(result, "\tsubi r31, 8\n");
     return result;
 }
@@ -248,7 +248,7 @@ char* expandPop(char* rd) {
     result[0] = '\0';
 
     char tmp[64];
-    sprintf(tmp, "\tmov %s, (r31) (0)\n", rd);
+    sprintf(tmp, "\tmov %s, (r31)(0)\n", rd);
     strcat(result, tmp);
     strcat(result, "\taddi r31, 8\n");
     return result;
@@ -296,12 +296,13 @@ int deciVerify(char* c, int flag) {
         perror("number given has a length of 0!");
         return 0;
     }
+
     if (!flag && c[0] == '-') {
         perror("Number is supposed to be unsigned!");
         return 0;
     }
     for (int i = 0; c[i] != '\0'; i++) {
-        if ((c[i] - '0' >= 0 || c[i] - '0' <= 9) || (i == 0 && c[0] == '-')) {
+        if ((c[i] - '0' >= 0 && c[i] - '0' <= 9) || (i == 0 && c[0] == '-')) {
             continue;
         } else {
             return 0;
