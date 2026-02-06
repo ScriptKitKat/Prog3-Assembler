@@ -491,7 +491,8 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         if (count == 4) {
             if (caseMov == 2 && verifyRegister(values[1]) && deciVerify(values[2], 1) && verifyRegister(values[3])) {
                 return result;
-            }else if (caseMov == 1 && verifyRegister(values[1]) && verifyRegister(values[2]) && deciVerify(values[3], 1)) {
+            }
+            if (caseMov == 1 && verifyRegister(values[1]) && verifyRegister(values[2]) && deciVerify(values[3], 1)) {
                 return result;
             }
         }
