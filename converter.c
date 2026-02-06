@@ -339,22 +339,32 @@ int movCase(char* line) {
             regfree(&re);
             return 1;
         }
-    } else if (regcomp(&re, "^\\s*mov \\(r[0-9]+\\)\\(-?[0-9]+\\)\\s*,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+    }
+    regfree(&re);
+
+    if (regcomp(&re, "^\\s*mov \\(r[0-9]+\\)\\(-?[0-9]+\\)\\s*,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, line, 0, NULL, 0) == 0) {
             regfree(&re);
             return 2;
         }
-    } else if (regcomp(&re, "^\\s*mov r[0-9]+,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
-        if (regexec(&re, line, 0, NULL, 0) == 0) {
-            regfree(&re);
-            return 3;
-        }
-    } else if (regcomp(&re, "^\\s*mov r[0-9]+, [0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+    }
+    regfree(&re);
+    
+    if (regcomp(&re, "^\\s*mov r[0-9]+,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
         if (regexec(&re, line, 0, NULL, 0) == 0) {
             regfree(&re);
             return 3;
         }
     }
+    regfree(&re);
+    
+    if (regcomp(&re, "^\\s*mov r[0-9]+, [0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+        if (regexec(&re, line, 0, NULL, 0) == 0) {
+            regfree(&re);
+            return 4;
+        }
+    }
+    regfree(&re);
 
     return -1;
 }
@@ -624,6 +634,15 @@ int main(int argc, char* argv[]) {
     }
 
     char* cleanedFile = cleanFile(argv[1]);
+
+    regex_t re;
+
+    if (regcomp(&re, "^\\s*mov r[0-9]+,\\s*r[0-9]+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+        if (regexec(&re, "\tmov r1, r2", 0, NULL, 0) == 0) {
+            printf("matchy!");
+            regfree(&re);
+        }
+    }
 
     if (cleanedFile == NULL) {
         perror("Invalid!\n");
