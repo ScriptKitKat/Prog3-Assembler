@@ -72,3 +72,28 @@ nt macroSize(char* line) {
     return -1;
 }
 */
+
+/*
+    brr l
+
+    invalid tko/int:
+    brr r
+    mov mr
+    mov_rl
+    mov rm
+    move rr
+
+    mulf
+    not
+    brnz
+    brr l
+
+    brr r
+
+    mov mr
+    mov rm
+
+    mov rr
+
+    not
+    */

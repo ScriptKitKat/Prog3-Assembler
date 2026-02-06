@@ -3,8 +3,7 @@
 	mov (r31)(-8), r0
 	subi r31, 8
 	addi r0, 4095
-	mov (r1)(-33), r4
-	mov r0, r4, r5
+	mov (r1)(), r4
 	mov r0, 177
 	mov r0, (r31)(0)
 	addi r31, 8
@@ -35,7 +34,7 @@
 	shftli r0, 12
 	addi r0, 265
 	shftli r0, 4
-	addi r0, 12
+	addi r0, 8
 .data
 	322834289
 .code

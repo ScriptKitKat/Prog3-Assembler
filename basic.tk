@@ -2,8 +2,7 @@
 	add      r0,         r21,    r1
 	push r0
 	addi r0,4095
-	mov (r1)(-33), r4
-	mov r0, r4, r5
+	mov (r1)(), r4
 	mov r0, 177
 	pop r0
 	in r0,r1

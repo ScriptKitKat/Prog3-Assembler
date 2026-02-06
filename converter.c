@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdint.h>
 #include "toIntermediate.h"
+#include <regex.h>
 
 
 typedef struct {
@@ -329,6 +330,34 @@ int deciVerify(char* c, int flag) {
     return 1;
 }
 
+int movCase(char* line) {
+    regex_t re;
+
+    if (regcomp(&re, "^\\s*mov r\\d+\\s*, \\(r\\d+\\)\\(-?\\d+\\)\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+        if (regexec(&re, line, 0, NULL, 0) == 0) {
+            regfree(&re);
+            return 1;
+        }
+    } else if (regcomp(&re, "^\\s*mov \\(r\\d+\\)\\(-?\\d+\\)\\s*,\\s*r\\d+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+        if (regexec(&re, line, 0, NULL, 0) == 0) {
+            regfree(&re);
+            return 2;
+        }
+    } else if (regcomp(&re, "^\\s*mov r\\d+,\\s*r\\d+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+        if (regexec(&re, line, 0, NULL, 0) == 0) {
+            regfree(&re);
+            return 3;
+        }
+    } else if (regcomp(&re, "^\\s*mov r\\d+, \\d+\\s*$", REG_EXTENDED | REG_NOSUB) == 0) {
+        if (regexec(&re, line, 0, NULL, 0) == 0) {
+            regfree(&re);
+            return 3;
+        }
+    }
+
+    return -1;
+}
+
 char* getMacroLine(char* line, char** values, int count, char instructionLabel[][256], unsigned int* instructionAddress, int labelCount) {
     char* result = malloc(512);
 
@@ -435,20 +464,22 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
 
     // seperate macro case
     if (strcmp(opcode, "mov") == 0) {
+        int caseMov = movCase(line);
+
         sprintf(result, "%s\n", line);
         if (count == 3) {
-            if (verifyRegister(values[1]) && verifyRegister(values[2])) {
+            if (caseMov == 3 && verifyRegister(values[1]) && verifyRegister(values[2])) {
                 return result;
             }
-            if (verifyRegister(values[1]) &&  deciVerify(values[2], 0)) {
+            if (caseMov == 4 && verifyRegister(values[1]) &&  deciVerify(values[2], 0)) {
                 return result;
             }
         }
 
         if (count == 4) {
-            if (verifyRegister(values[1]) && deciVerify(values[2], 1) && verifyRegister(values[3])) {
+            if (caseMov == 2 && verifyRegister(values[1]) && deciVerify(values[2], 1) && verifyRegister(values[3])) {
                 return result;
-            }else if (verifyRegister(values[1]) && verifyRegister(values[2]) && deciVerify(values[3], 1)) {
+            }else if (caseMov == 1 && verifyRegister(values[1]) && verifyRegister(values[2]) && deciVerify(values[3], 1)) {
                 return result;
             }
         }
@@ -493,30 +524,6 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         }
     }
 
-    /*
-    brr l
-
-    invalid tko/int:
-    brr r
-    mov mr
-    mov_rl
-    mov rm
-    move rr
-
-    mulf
-    not
-    brnz
-    brr l
-
-    brr r
-
-    mov mr
-    mov rm
-
-    mov rr
-
-    not
-    */
     if (strcmp(opcode, "push") == 0) {
         if (verifyRegister(values[1])) {
             return expandPush(values[1]);
