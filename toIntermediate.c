@@ -107,8 +107,9 @@ char* cleanFile(char* file) {
     while ((read = getline(&line, &len, f)) != -1) {
         if (line[0] == '.') {
             if (strcmp(line, mode) != 0 || strlen(cleaned) == 0) {
+                printf("yes2\n");
                 if (strcmp(line, ".code\n") == 0) {
-                    code = 1;
+                    printf("yes2\n");
                     strcat(cleaned, ".code\n");
                     mode = ".code\n";
                 } else if (strcmp(line, ".data\n") == 0) {
@@ -120,6 +121,9 @@ char* cleanFile(char* file) {
                     fclose(f);
                     return NULL;
                 }
+            }
+            if (strcmp(line, ".code\n") == 0) {
+                code = 1;
             }
         } else if (line[0] == '\t') {
             char* res = handleTabs(line);
@@ -142,9 +146,9 @@ char* cleanFile(char* file) {
             return NULL;
         }
     }
+
     free(line);
     fclose(f);
-
     if (code == 1) {
         return cleaned;
     } else {

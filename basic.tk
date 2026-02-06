@@ -1,3 +1,4 @@
+:L0
 .code
 	ld r5, :target
 	br r5
