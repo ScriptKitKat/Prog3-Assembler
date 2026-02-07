@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
 
     if (result == NULL) {
         perror("Invalid macro!\n");
-        return NULL;
+        return 1;
     }
 
     // Test binary

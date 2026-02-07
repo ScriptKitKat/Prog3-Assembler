@@ -739,7 +739,7 @@ char* toIntermediate(char* inFile, char* outFile) {
 
     if (cleanedFile == NULL) {
         perror("Invalid!\n");
-        return 1;
+        return NULL;
     }
     
     char instructionLabel[1024][256];
