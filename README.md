@@ -1,6 +1,12 @@
 Name: Priscilla Ye
 EID: pjy263
 
+How to run code:
+hw3 ./input_filename ./intermediate_filename.tk ./output_filename.tko
+
+How to run tests:
+tests ./test.tk
+
 # My Pseudocode:
 Merge consecutive .code and .data directives and ignore comments and check if an instruction has too many arguments, too few, invalid registers, invalid instruction types, etc.
 String cleanedFiled = cleanFile(file)
