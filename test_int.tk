@@ -1,43 +1,63 @@
 .code
-	xor r5, r5, r5
-	addi r5, 0
-	shftli r5, 12
-	addi r5, 0
-	shftli r5, 12
-	addi r5, 0
-	shftli r5, 12
-	addi r5, 0
-	shftli r5, 12
-	addi r5, 259
-	shftli r5, 4
-	addi r5, 4
-	br r5
+	mov r1, 5
+	xor r10, r10, r10
+	addi r10, 0
+	shftli r10, 12
+	addi r10, 0
+	shftli r10, 12
+	addi r10, 0
+	shftli r10, 12
+	addi r10, 0
+	shftli r10, 12
+	addi r10, 260
+	shftli r10, 4
+	addi r10, 0
+	call r10
+	priv r1, r0, r0, 4
 	priv r0, r0, r0, 0
-	xor r1, r1, r1
-	addi r1, 0
-	shftli r1, 12
-	addi r1, 0
-	shftli r1, 12
-	addi r1, 0
-	shftli r1, 12
-	addi r1, 0
-	shftli r1, 12
-	addi r1, 262
-	shftli r1, 4
-	addi r1, 12
-	brnz r1, r2
-	add r0, r0, r1
-	xor r3, r3, r3
-	addi r3, 0
-	shftli r3, 12
-	addi r3, 0
-	shftli r3, 12
-	addi r3, 0
-	shftli r3, 12
-	addi r3, 0
-	shftli r3, 12
-	addi r3, 266
-	shftli r3, 4
-	addi r3, 4
-	brgt r3, r5, r6
-	priv r0, r0, r0, 0
+	mov (r31)(-8), r2
+	subi r31, 8
+	mov (r31)(-8), r3
+	subi r31, 8
+	mov r3, 1
+	mov r2, 1
+	xor r11, r11, r11
+	addi r11, 0
+	shftli r11, 12
+	addi r11, 0
+	shftli r11, 12
+	addi r11, 0
+	shftli r11, 12
+	addi r11, 0
+	shftli r11, 12
+	addi r11, 266
+	shftli r11, 4
+	addi r11, 4
+	brgt r11, r1, r2
+	mov r0, 1
+	mov r3, (r31)(0)
+	addi r31, 8
+	mov r2, (r31)(0)
+	addi r31, 8
+	return	mul r3, r3, r1
+	subi r1, 1
+	mov r2, 1
+	xor r11, r11, r11
+	addi r11, 0
+	shftli r11, 12
+	addi r11, 0
+	shftli r11, 12
+	addi r11, 0
+	shftli r11, 12
+	addi r11, 0
+	shftli r11, 12
+	addi r11, 266
+	shftli r11, 4
+	addi r11, 4
+	brgt r11, r1, r2
+	mov r0, r3
+	mov r3, (r31)(0)
+	addi r31, 8
+	mov r2, (r31)(0)
+	addi r31, 8
+	return

@@ -1,0 +1,33 @@
+.code
+	mov r1, 5
+	ld r10, :factorial
+	call r10
+	out r1, r0
+	halt
+:factorial
+	push r2
+	push r3
+	mov r3, 1
+	mov r2, 1
+	ld r11, :fact_loop
+	brgt r11, r1, r2
+;base case
+	mov r0, 1
+	pop r3
+	pop r2
+	return
+:fact_loop
+;result = result * n
+	mul r3, r3, r1
+; n = n - 1
+	subi r1, 1
+;if (n > 1) continue loop
+	mov r2, 1
+	ld r11, :fact_loop
+	brgt r11, r1, r2
+;Done, move result to r0
+	mov r0, r3
+;Restore registers
+	pop r3
+	pop r2
+	return

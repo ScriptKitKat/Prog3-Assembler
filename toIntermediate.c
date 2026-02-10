@@ -141,6 +141,7 @@ char* cleanFile(char* file) {
                 return NULL;
             }
         } else {
+            printf("%s", line);
             perror("Invalid Line!");
             free(cleaned);
             fclose(f);
@@ -643,6 +644,7 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         }
     }
 
+    printf("%s\n", line);
     perror("non-existent instruction!");
     return NULL;
 }

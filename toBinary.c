@@ -153,7 +153,7 @@ void writeBinary(char* file, char* filepath) {
 
             fwrite(&res, sizeof(uint32_t), 1, fptr);
         }
-
+        
         if (strlen(token) > 0 && token[0] == '\t' && strcmp(mode, ".data") == 0) {
             uint64_t res = atoi(token + 1);
 

@@ -1,16 +1,29 @@
-:L0
 .code
-	ld r5, :target
-	br r5
-:target
-	halt
-; brnz (branch if not zero)
-	ld r1, :loop_start
-	brnz r1, r2
-:loop_start
-	add r0, r0, r1
-; brgt (branch if greater than)
-	ld r3, :end_label
-	brgt r3, r5, r6
-:end_label
-	halt
+	addi r1, 3
+	addi r2, 7
+	and r3, r2, r1
+	out r3, r2
+; should print 3
+	addi r1, 3
+	addi r2, 7
+	or r3, r2, r1
+	out r3, r2
+; should print 7
+	addi r1, 3
+	addi r2, 7
+	xor r3, r2, r1
+	out r3, r2
+; should print 4
+	addi r1, 1
+	not r2, r1
+	out r2, r1
+; should print 2^64 - 2
+	addi r1, 3
+	addi r2, 2
+	shftr r2, r2, r1
+	out r2, r1
+; should print 12
+	addi r1, 3
+	shftri r2, 3
+	out r2, r1
+; should print 24
