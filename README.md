@@ -26,4 +26,3 @@ write(result, "out.tk")
 Translate intermediate file to a binary file
 String binFile = translate("out.tk")
 write (binfile, "out.tko")
-*/

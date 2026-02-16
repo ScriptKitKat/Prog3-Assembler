@@ -76,6 +76,7 @@ char* trim(char* word) {
     return word;
 }
 
+// Removes comments and 
 char* cleanFile(char* file) {
     if (strlen(file) <= 0) {
         perror("Invalid file name length");
@@ -164,7 +165,9 @@ int findAddress(char* file, char instructionLabel[][256], unsigned int* instruct
     char* fileCopy = strdup(file);
     char* line = strtok(fileCopy, "\n");
     int labelNum = 0;
-    unsigned int current = 0x1000;
+    unsigned int codeCurrent = 0x2000;
+
+    unsigned int dataCurrent = 0x10000;
 
     char* mode = ".code";
 
@@ -180,17 +183,22 @@ int findAddress(char* file, char instructionLabel[][256], unsigned int* instruct
         if (strcmp(mode, ".code") == 0) {
             if (strlen(line) != 0) {
                 if (line[0] == '\t') {
-                    current += macroSize(line) * 4;
+                    codeCurrent += macroSize(line) * 4;
                 }
             }
         } else if (strcmp(mode, ".data") == 0) {
             if (line[0] == '\t') {
-                current += 8;
+                dataCurrent += 8;
             }
         }
         if (line[0] == ':') {
             strcpy(instructionLabel[labelNum], line);
-            instructionAddress[labelNum] = current;
+            if (strcmp(mode, ".code") == 0) {
+                instructionAddress[labelNum] = codeCurrent;
+            }
+            if (strcmp(mode, ".data") == 0) {
+                instructionAddress[labelNum] = dataCurrent;
+            }
             labelNum++;
         }
         line = strtok(NULL, "\n");
@@ -524,7 +532,10 @@ char* getMacroLine(char* line, char** values, int count, char instructionLabel[]
         return result;
     }
 
-    if (strcmp(opcode, "return") == 0 && count == 1) return line;
+    if (strcmp(opcode, "return") == 0 && count == 1) {
+        sprintf(result, "%s\n", line);
+        return result;
+    }
 
     // 5 arguments
     if (strcmp(opcode, "priv") == 0) {
